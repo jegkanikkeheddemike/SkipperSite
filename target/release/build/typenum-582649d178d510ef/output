@@ -1,2 +1,0 @@
-cargo:rustc-env=TYPENUM_BUILD_CONSTS=C:\Users\thor\OneDrive\StudioCode\SkipperSite\target\release\build\typenum-582649d178d510ef\out\consts.rs
-cargo:rustc-env=TYPENUM_BUILD_OP=C:\Users\thor\OneDrive\StudioCode\SkipperSite\target\release\build\typenum-582649d178d510ef\out\op.rs
