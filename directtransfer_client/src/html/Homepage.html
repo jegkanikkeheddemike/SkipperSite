@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+
+    {style} {scripts}
+</head>
+
+<body>
+    <div id="app">
+        <h1 id="Title">
+            DirectTransfer
+        </h1>
+        <div class="center">
+            <button onclick="change_mode()" class="big_button">Mode: {{ mode }}</button>
+        </div>
+        <div name="host form" v-if="mode =='host'" class="mode_form">
+            <label>Hosting File/Folder</label> <br>
+            <input type="text" id="filefoldername" style="width: 100%;"><br>
+            <button onclick="pick_folder()" style="margin-top: 5px;">Pick File/Folder</button>
+        </div>
+
+        <div name="leech form" v-if="mode =='leech'" class="mode_form">
+            <label>Connection IP</label> <br>
+            <input type="text" id="connection_ip" style="width: 100%;">
+
+        </div>
+        <div class="center">
+            <button onclick="begin_mode()" class="big_button">{{ mode }}</button>
+        </div>
+
+        <div v-if="status !='not started'">
+            <h2>
+                Status: {{status}}
+            </h2>
+            <h3>
+                <span v-if="mode =='host'">Ip: {{host_ip}} <br></span>
+                Files: {{files}} <br>
+                Size: {{totalsize}} <br>
+                Progress: {{progress}}
+
+            </h3>
+        </div>
+
+
+    </div>
+    <script>external.invoke("setup");</script>
+    {vue_scripts}
+</body>
+
+</html>

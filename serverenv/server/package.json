@@ -1,0 +1,15 @@
+{
+  "name": "skipperserver",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "Thor Frøding Skipper",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.2",
+    "localtunnel": "^2.0.2"
+  }
+}

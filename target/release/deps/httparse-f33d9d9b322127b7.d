@@ -1,0 +1,12 @@
+C:\Users\thor\OneDrive\StudioCode\SkipperSite\target\release\deps\httparse-f33d9d9b322127b7.rmeta: C:\Users\thor\.cargo\registry\src\github.com-1ecc6299db9ec823\httparse-1.5.1\src\lib.rs C:\Users\thor\.cargo\registry\src\github.com-1ecc6299db9ec823\httparse-1.5.1\src\iter.rs C:\Users\thor\.cargo\registry\src\github.com-1ecc6299db9ec823\httparse-1.5.1\src\macros.rs C:\Users\thor\.cargo\registry\src\github.com-1ecc6299db9ec823\httparse-1.5.1\src\simd\mod.rs C:\Users\thor\.cargo\registry\src\github.com-1ecc6299db9ec823\httparse-1.5.1\src\simd\sse42.rs C:\Users\thor\.cargo\registry\src\github.com-1ecc6299db9ec823\httparse-1.5.1\src\simd\avx2.rs
+
+C:\Users\thor\OneDrive\StudioCode\SkipperSite\target\release\deps\libhttparse-f33d9d9b322127b7.rlib: C:\Users\thor\.cargo\registry\src\github.com-1ecc6299db9ec823\httparse-1.5.1\src\lib.rs C:\Users\thor\.cargo\registry\src\github.com-1ecc6299db9ec823\httparse-1.5.1\src\iter.rs C:\Users\thor\.cargo\registry\src\github.com-1ecc6299db9ec823\httparse-1.5.1\src\macros.rs C:\Users\thor\.cargo\registry\src\github.com-1ecc6299db9ec823\httparse-1.5.1\src\simd\mod.rs C:\Users\thor\.cargo\registry\src\github.com-1ecc6299db9ec823\httparse-1.5.1\src\simd\sse42.rs C:\Users\thor\.cargo\registry\src\github.com-1ecc6299db9ec823\httparse-1.5.1\src\simd\avx2.rs
+
+C:\Users\thor\OneDrive\StudioCode\SkipperSite\target\release\deps\httparse-f33d9d9b322127b7.d: C:\Users\thor\.cargo\registry\src\github.com-1ecc6299db9ec823\httparse-1.5.1\src\lib.rs C:\Users\thor\.cargo\registry\src\github.com-1ecc6299db9ec823\httparse-1.5.1\src\iter.rs C:\Users\thor\.cargo\registry\src\github.com-1ecc6299db9ec823\httparse-1.5.1\src\macros.rs C:\Users\thor\.cargo\registry\src\github.com-1ecc6299db9ec823\httparse-1.5.1\src\simd\mod.rs C:\Users\thor\.cargo\registry\src\github.com-1ecc6299db9ec823\httparse-1.5.1\src\simd\sse42.rs C:\Users\thor\.cargo\registry\src\github.com-1ecc6299db9ec823\httparse-1.5.1\src\simd\avx2.rs
+
+C:\Users\thor\.cargo\registry\src\github.com-1ecc6299db9ec823\httparse-1.5.1\src\lib.rs:
+C:\Users\thor\.cargo\registry\src\github.com-1ecc6299db9ec823\httparse-1.5.1\src\iter.rs:
+C:\Users\thor\.cargo\registry\src\github.com-1ecc6299db9ec823\httparse-1.5.1\src\macros.rs:
+C:\Users\thor\.cargo\registry\src\github.com-1ecc6299db9ec823\httparse-1.5.1\src\simd\mod.rs:
+C:\Users\thor\.cargo\registry\src\github.com-1ecc6299db9ec823\httparse-1.5.1\src\simd\sse42.rs:
+C:\Users\thor\.cargo\registry\src\github.com-1ecc6299db9ec823\httparse-1.5.1\src\simd\avx2.rs:

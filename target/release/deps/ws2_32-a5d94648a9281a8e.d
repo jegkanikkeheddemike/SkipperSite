@@ -1,0 +1,7 @@
+C:\Users\thor\OneDrive\StudioCode\SkipperSite\target\release\deps\ws2_32-a5d94648a9281a8e.rmeta: C:\Users\thor\.cargo\registry\src\github.com-1ecc6299db9ec823\ws2_32-sys-0.2.1\src\lib.rs
+
+C:\Users\thor\OneDrive\StudioCode\SkipperSite\target\release\deps\libws2_32-a5d94648a9281a8e.rlib: C:\Users\thor\.cargo\registry\src\github.com-1ecc6299db9ec823\ws2_32-sys-0.2.1\src\lib.rs
+
+C:\Users\thor\OneDrive\StudioCode\SkipperSite\target\release\deps\ws2_32-a5d94648a9281a8e.d: C:\Users\thor\.cargo\registry\src\github.com-1ecc6299db9ec823\ws2_32-sys-0.2.1\src\lib.rs
+
+C:\Users\thor\.cargo\registry\src\github.com-1ecc6299db9ec823\ws2_32-sys-0.2.1\src\lib.rs:

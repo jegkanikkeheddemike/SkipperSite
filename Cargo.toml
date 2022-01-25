@@ -1,0 +1,8 @@
+[workspace]
+
+
+members = [
+    "directtransfer_client",
+    "directtransfer",
+    "serverenv",
+]
