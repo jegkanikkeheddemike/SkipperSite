@@ -461,6 +461,7 @@ dependencies = [
  "bincode",
  "byteorder",
  "ipconfig",
+ "local-ip-address",
  "serde",
  "walkdir",
 ]
