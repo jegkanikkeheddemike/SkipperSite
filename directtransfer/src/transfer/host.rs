@@ -2,9 +2,15 @@ use std::{
     fs::{self, File},
     io::{Error, Write, ErrorKind},
     net::TcpListener,
-    os::windows::prelude::FileExt,
     path::Path,
 };
+
+#[cfg(target_os="windows")]
+    use std::os::windows::prelude::FileExt;
+
+#[cfg(target_os="linux")]
+    use std::os::unix::fs::FileExt;
+
 use walkdir::WalkDir;
 
 use crate::{
@@ -24,9 +30,23 @@ pub fn host(args: &[String], output: fn(print: String)) -> Result<(), Error> {
     let addr = listener.local_addr()?;
 
     let port = String::from(&format!("{}", &addr)[8..]);
-    let ip_addr = ipconfig::get_adapters().unwrap()[0].ip_addresses()[0];
+    let print_addr;
+    #[cfg(target_os="windows")]
+    {
+        print_addr = format!(
+            "{}:{}",
+            ipconfig::get_adapters().unwrap()[0].ip_addresses()[0],
+            port
+        );
+    }
+    #[cfg(target_os="linux")]
+    {
+        print_addr = format!(
+            "{}:{}",local_ip_address::local_ip().unwrap(),port
+        );
+    }
     output("STATUS: Waiting for connection".to_owned());
-    output(format!("listening on {}:{}", ip_addr, port));
+    output(print_addr);
 
     let mut progress = 0u8;
     let mut total_transferred = 0u64;
@@ -59,14 +79,28 @@ pub fn host(args: &[String], output: fn(print: String)) -> Result<(), Error> {
         let last_chunk_size =
             files[file_index as usize].1.metadata().unwrap().len() as usize % chunk_size;
 
-        let file_meta_data = FileMetaData {
-            filename: String::from(
+        let filename;
+        #[cfg(target_os="windows")]{
+            filename = String::from(
                 files[file_index as usize]
                     .0
                     .clone()
                     .split_at(target_path.rfind("\\").unwrap() + 1)
                     .1,
-            ),
+            );
+        }
+        #[cfg(target_os = "linux")] {
+            filename = String::from(
+                files[file_index as usize]
+                    .0
+                    .clone()
+                    .split_at(target_path.rfind("/").unwrap() + 1)
+                    .1,
+            );
+        }
+
+        let file_meta_data = FileMetaData {
+            filename,
             chunk_amount,
             chunk_size: chunk_size,
             last_chunk_size,
@@ -89,10 +123,17 @@ pub fn host(args: &[String], output: fn(print: String)) -> Result<(), Error> {
             //load the chunk into memory from the file
             let mut chunk_bytes = vec![0u8; chunk_size];
             let offset = chunk_index * chunk_size as u64;
-            files[file_index as usize]
-                .1
-                .seek_read(&mut chunk_bytes, offset)?;
-
+            #[cfg(target_os = "linux")]
+            {
+                files[file_index as usize]
+                    .1
+                    .read_at(&mut chunk_bytes, offset)?;
+            }
+            #[cfg(target_os = "windows")] {
+                files[file_index as usize]
+                    .1
+                    .seek_read(&mut chunk_bytes, offset)?;
+            }
             //Transfer the chunk
             stream.write(&chunk_bytes)?;
             total_transferred += chunk_size as u64;
@@ -108,9 +149,18 @@ pub fn host(args: &[String], output: fn(print: String)) -> Result<(), Error> {
         let mut last_chunk_bytes = vec![0u8; last_chunk_size];
         let offset = (chunk_amount - 1) * file_meta_data.chunk_size as u64;
 
-        files[file_index as usize]
-            .1
-            .seek_read(&mut last_chunk_bytes, offset)?;
+        #[cfg(target_os = "linux")]
+        {
+            files[file_index as usize]
+                .1
+                .read_at(&mut last_chunk_bytes, offset)?;
+        }
+        #[cfg(target_os = "windows")]
+        {
+            files[file_index as usize]
+                .1
+                .seek_read(&mut last_chunk_bytes, offset)?;
+        }    
         stream.write(&last_chunk_bytes)?;
 
         total_transferred += last_chunk_size as u64;

@@ -1,8 +1,11 @@
 use std::{
     io::{Error, Read},
     net::TcpStream,
-    os::windows::prelude::FileExt,
 };
+#[cfg(target_os = "windows")] 
+    use std::os::windows::prelude::FileExt;
+#[cfg(target_os="linux")]
+    use std::os::unix::fs::FileExt;
 
 use crate::{
     settings,
@@ -62,8 +65,18 @@ pub fn leech(args: &[String], output: fn(print: String)) -> Result<(), Error> {
         let file_meta_data: FileMetaData = bincode::deserialize(&file_meta_data_buffer).unwrap();
 
         //create the file
-        let path = format!("{}\\{}", output_dir, file_meta_data.filename);
-        std::fs::create_dir_all(path.split_at(path.rfind("\\").unwrap()).0)?;
+        let mut path;
+        #[cfg(target_os="windows")]
+        {
+            path = format!("{}\\{}", output_dir, file_meta_data.filename);
+            path = path.replace("/","\\");
+            std::fs::create_dir_all(path.split_at(path.rfind("\\").unwrap()).0)?;
+        }
+        #[cfg(target_os="linux")]{
+            path = format!("{}/{}", output_dir, file_meta_data.filename);
+            path = path.replace("\\", "/");
+            std::fs::create_dir_all(path.split_at(path.rfind("/").unwrap()).0)?;
+        }
         let file = std::fs::OpenOptions::new()
             .read(true)
             .write(true)
@@ -80,7 +93,14 @@ pub fn leech(args: &[String], output: fn(print: String)) -> Result<(), Error> {
 
             //then write the chunk into the file
             let offset = chunk_index * file_meta_data.chunk_size as u64;
-            file.seek_write(&mut chunk_bytes, offset)?;
+            #[cfg(target_os = "linux")]
+            {
+                file.write_at(&mut chunk_bytes, offset)?;
+            }
+            #[cfg(target_os = "windows")]
+            {
+                file.seek_write(&mut chunk_bytes, offset)?;
+            }
 
             total_transferred += file_meta_data.chunk_size as u64;
             transfer::check_progress(
@@ -96,7 +116,14 @@ pub fn leech(args: &[String], output: fn(print: String)) -> Result<(), Error> {
         stream.read_exact(&mut last_chunk_bytes)?;
         let offset = (file_meta_data.chunk_amount - 1) * file_meta_data.chunk_size as u64;
 
-        file.seek_write(&last_chunk_bytes, offset)?;
+        #[cfg(target_os = "linux")]
+        {
+            file.write_at(&last_chunk_bytes, offset)?;
+        }
+        #[cfg(target_os = "windows")]
+        {
+            file.seek_write(&last_chunk_bytes, offset)?;
+        }
         total_transferred += file_meta_data.last_chunk_size as u64;
 
         transfer::check_progress(
