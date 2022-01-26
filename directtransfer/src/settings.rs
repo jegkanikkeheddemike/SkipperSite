@@ -69,14 +69,14 @@ pub struct Settings {
 
 fn std_settings() -> Settings {
     Settings {
-        output_path: format!("{}/output", torrtransfer_folder()),
+        output_path: format!("{}/output", directtransfer_folder()),
         chunk_size: 262144,
     }
 }
 fn save_settings(settings: &Settings) {
     //Make sure the folder exitsts
-    if !Path::exists(Path::new(&torrtransfer_folder())) {
-        std::fs::create_dir_all(torrtransfer_folder()).unwrap();
+    if !Path::exists(Path::new(&directtransfer_folder())) {
+        std::fs::create_dir_all(directtransfer_folder()).unwrap();
     }
 
     let settings_bytes = bincode::serialize(&settings).unwrap();
@@ -84,15 +84,15 @@ fn save_settings(settings: &Settings) {
         .read(true)
         .write(true)
         .create(true)
-        .open(format!("{}/settings2", torrtransfer_folder()))
+        .open(format!("{}/settings", directtransfer_folder()))
         .unwrap();
     file.write_all(&settings_bytes).unwrap();
 }
 
 fn get_settings() -> Settings {
     //if the settings file exitst, then load from it. If not then create new
-    if Path::new(&format!("{}/settings2",torrtransfer_folder())).exists() {
-        let mut file = std::fs::File::open(&format!("{}/settings2",torrtransfer_folder())).unwrap();
+    if Path::new(&format!("{}/settings",directtransfer_folder())).exists() {
+        let mut file = std::fs::File::open(&format!("{}/settings",directtransfer_folder())).unwrap();
         let mut settings_buffer = vec![0u8; file.metadata().unwrap().len() as usize];
         file.read(&mut settings_buffer).unwrap();
         let settings: Settings = bincode::deserialize_from(&settings_buffer[..]).unwrap();
@@ -117,14 +117,18 @@ pub fn std_output(print: String) {
     println!("{}", print);
 }
 
-fn torrtransfer_folder() -> String {
+fn directtransfer_folder() -> String {
     #[cfg(target_os = "windows")]
     {
-        String::from("C:\\ProgramData\\TorrTransfer")
+        println!("Gettings settings from windows platform!");
+        String::from("C:\\ProgramData\\directtransfer")
     }
     #[cfg(target_os = "linux")]
     {
+        println!("Gettings settings from linux platform!");
         let home = String::from(home::home_dir().unwrap().to_str().unwrap());
-        format!("{}/Documents/TorrTransfer", home)
+        let res = format!("{}/Documents/directtransfer", home);
+        println!("Directtransfer folder: {}",res);
+        res
     }
 }

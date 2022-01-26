@@ -17,8 +17,9 @@ use super::TransferMetaData;
 pub fn leech(args: &[String], output: fn(print: String)) -> Result<(), Error> {
     let target_ip = &args[0];
     let mut output_dir = &settings::output_path();
-    if args.len() > 2 {
+    if args.len() > 0 {
         output_dir = &args[1];
+        output(format!("Settings ignored, using {} instead",output_dir));
     }
 
     let mut progress = 0u8;
