@@ -1,5 +1,5 @@
 use std::{
-    io::{Error, Read, Write, ErrorKind},
+    io::{Error, ErrorKind, Read, Write},
     path::Path,
 };
 
@@ -20,7 +20,10 @@ pub fn settings(args: &[String]) -> Result<(), Error> {
         "reset" => reset_settings(),
         _ => {
             println!("Failed to read settings argument, please augment, get, set or reset");
-            return Err(Error::new(ErrorKind::InvalidInput, "Invalid argument, please augment, get, set or reset"))
+            return Err(Error::new(
+                ErrorKind::InvalidInput,
+                "Invalid argument, please augment, get, set or reset",
+            ));
         }
     }
     Ok(())
@@ -66,15 +69,14 @@ pub struct Settings {
 
 fn std_settings() -> Settings {
     Settings {
-        output_path: String::from("C:\\ProgramData\\TorrTransfer\\Output"),
+        output_path: format!("{}/output", torrtransfer_folder()),
         chunk_size: 262144,
     }
 }
-
 fn save_settings(settings: &Settings) {
     //Make sure the folder exitsts
-    if !Path::exists(Path::new("C:\\ProgramData\\TorrTransfer")) {
-        std::fs::create_dir_all("C:\\ProgramData\\TorrTransfer").unwrap();
+    if !Path::exists(Path::new(&torrtransfer_folder())) {
+        std::fs::create_dir_all(torrtransfer_folder()).unwrap();
     }
 
     let settings_bytes = bincode::serialize(&settings).unwrap();
@@ -82,15 +84,15 @@ fn save_settings(settings: &Settings) {
         .read(true)
         .write(true)
         .create(true)
-        .open("C:\\ProgramData\\TorrTransfer\\Settings2")
+        .open(format!("{}/settings2", torrtransfer_folder()))
         .unwrap();
     file.write_all(&settings_bytes).unwrap();
 }
 
 fn get_settings() -> Settings {
     //if the settings file exitst, then load from it. If not then create new
-    if Path::new("C:\\ProgramData\\TorrTransfer\\Settings2").exists() {
-        let mut file = std::fs::File::open("C:\\ProgramData\\TorrTransfer\\Settings2").unwrap();
+    if Path::new(&format!("{}/settings2",torrtransfer_folder())).exists() {
+        let mut file = std::fs::File::open(&format!("{}/settings2",torrtransfer_folder())).unwrap();
         let mut settings_buffer = vec![0u8; file.metadata().unwrap().len() as usize];
         file.read(&mut settings_buffer).unwrap();
         let settings: Settings = bincode::deserialize_from(&settings_buffer[..]).unwrap();
@@ -103,7 +105,6 @@ fn get_settings() -> Settings {
     save_settings(&settings_new);
     settings_new
 }
-
 pub fn output_path() -> String {
     get_settings().output_path
 }
@@ -112,6 +113,18 @@ pub fn chunk_size() -> usize {
     get_settings().chunk_size
 }
 
-pub fn std_output(print: String){
-    println!("{}",print);
+pub fn std_output(print: String) {
+    println!("{}", print);
+}
+
+fn torrtransfer_folder() -> String {
+    #[cfg(target_os = "windows")]
+    {
+        String::from("C:\\ProgramData\\TorrTransfer")
+    }
+    #[cfg(target_os = "linux")]
+    {
+        let home = String::from(home::home_dir().unwrap().to_str().unwrap());
+        format!("{}/Documents/TorrTransfer", home)
+    }
 }
