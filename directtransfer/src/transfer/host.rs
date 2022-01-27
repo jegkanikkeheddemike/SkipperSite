@@ -142,7 +142,10 @@ pub fn host(args: &[String], output: fn(print: String)) -> Result<(), Error> {
                 transfer_meta_data.total_size,
                 &mut progress,
                 output,
-            )
+            );
+
+            //needs to sync with leech
+            stream.read_exact(&mut [0u8]).unwrap();
         }
 
         //Send the last chunk, which has a different size

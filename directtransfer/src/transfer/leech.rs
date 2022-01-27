@@ -102,7 +102,8 @@ pub fn leech(args: &[String], output: fn(print: String)) -> Result<(), Error> {
             {
                 file.seek_write(&mut chunk_bytes, offset)?;
             }
-
+            //Needs to sync with host
+            stream.write(&[1u8]).unwrap();
             total_transferred += file_meta_data.chunk_size as u64;
             transfer::check_progress(
                 total_transferred,
