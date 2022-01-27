@@ -1,6 +1,6 @@
 use std::{
     fs::{self, File},
-    io::{Error, Write, ErrorKind},
+    io::{Error, Write, ErrorKind, Read},
     net::TcpListener,
     path::Path,
 };
@@ -171,8 +171,20 @@ pub fn host(args: &[String], output: fn(print: String)) -> Result<(), Error> {
             output,
         );
     }
-    output("STATUS: Transfer complete".to_owned());
-    Ok(())
+
+    //Wait till the reciever has read ALL the content to close the stream
+    //It will be signaled by the "END_OF_TRANSFER" signal
+
+    let mut eof_buffer = vec![0u8;"END_OF_TRANSFER".as_bytes().len()];
+    stream.read_exact(&mut eof_buffer)?;
+
+    if eof_buffer.eq("END_OF_TRANSFER".as_bytes()) {
+        output("STATUS: Transfer complete".to_owned());
+        Ok(())
+    } else {
+        output("STATUS: Failed to read END_OF_TRANSFER message".to_owned());
+        Err(Error::new(ErrorKind::InvalidData,"Failed to read EOT message"))
+    }   
 }
 
 fn get_file_data(target_path: &String) -> Result<(Vec<(String, File)>, TransferMetaData), Error> {

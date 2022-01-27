@@ -1,5 +1,5 @@
 use std::{
-    io::{Error, Read},
+    io::{Error, Read, Write},
     net::TcpStream,
 };
 #[cfg(target_os = "windows")] 
@@ -134,6 +134,10 @@ pub fn leech(args: &[String], output: fn(print: String)) -> Result<(), Error> {
             output,
         );
     }
+
+    //Send shutdown signal
+    stream.write("END_OF_TRANSFER".as_bytes()).unwrap();
+
     output("STATUS: Transfer complete".to_string());
     Ok(())
 }
