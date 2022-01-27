@@ -17,7 +17,7 @@ use super::TransferMetaData;
 pub fn leech(args: &[String], output: fn(print: String)) -> Result<(), Error> {
     let target_ip = &args[0];
     let mut output_dir = &settings::output_path();
-    if args.len() > 0 {
+    if args.len() > 1 {
         output_dir = &args[1];
         output(format!("Settings ignored, using {} instead",output_dir));
     }
@@ -26,6 +26,8 @@ pub fn leech(args: &[String], output: fn(print: String)) -> Result<(), Error> {
     let mut total_transferred = 0u64;
 
     output("STATUS: Connecting".to_string());
+
+    println!("IP: {}",target_ip);
 
     let mut stream = TcpStream::connect(target_ip)?;
 

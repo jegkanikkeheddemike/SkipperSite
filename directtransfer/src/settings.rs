@@ -120,12 +120,10 @@ pub fn std_output(print: String) {
 fn directtransfer_folder() -> String {
     #[cfg(target_os = "windows")]
     {
-        println!("Gettings settings from windows platform!");
         String::from("C:\\ProgramData\\directtransfer")
     }
     #[cfg(target_os = "linux")]
     {
-        println!("Gettings settings from linux platform!");
         let home = String::from(home::home_dir().unwrap().to_str().unwrap());
         let res = format!("{}/Documents/directtransfer", home);
         println!("Directtransfer folder: {}",res);
