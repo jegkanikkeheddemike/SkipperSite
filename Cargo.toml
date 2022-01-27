@@ -5,4 +5,5 @@ members = [
     "directtransfer_client",
     "directtransfer",
     "serverenv",
+    "serverenv_control",
 ]

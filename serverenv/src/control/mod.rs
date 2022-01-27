@@ -1,43 +1,74 @@
-use std::{sync::{Arc, Mutex}, process::Stdio};
+use std::{
+    sync::{Arc, Mutex},
+};
 
-use tokio::process::{Child, Command};
-
-pub mod loops;
+use ::futures::executor;
+use tokio::{
+    io::AsyncWriteExt,
+    process::{Child, Command},
+}; // 1.3.1
 pub mod commands;
+pub mod loops;
 
 #[derive(Clone)]
 pub struct EnviromentState {
     pub command_queue: Arc<Mutex<deadqueue::unlimited::Queue<String>>>,
     pub runstate: Arc<Mutex<Runstate>>,
     pub server_process: Arc<Mutex<Child>>,
-    pub ngrok_process: Arc<Mutex<Child>>,
 }
 
-#[derive(PartialEq,Debug)]
+#[derive(PartialEq, Debug)]
 pub enum Runstate {
     Running,
     Closing,
-    Closed
 }
 
 pub fn spawn_server() -> tokio::process::Child {
-    #[cfg(target_os="windows")]{
-        Command::new("C:\\Program Files\\nodejs\\node.exe").arg("server\\server.js").spawn().unwrap()
+    let child;
+    #[cfg(target_os = "windows")]
+    {
+        child = Command::new("C:\\Program Files\\nodejs\\node.exe")
+            .arg("serverenv\\server\\server.js")
+            .spawn()
+            .unwrap();
     }
 
-    #[cfg(target_os="linux")] {
-        Command::new("node").arg("server/server.js").spawn().unwrap()
+    #[cfg(target_os = "linux")]
+    {
+        child = Command::new("node")
+            .arg("serverenv/server/server.js")
+            .spawn()
+            .unwrap();
     }
+    printout("server starting");
+    child
 }
 
-pub fn spawn_ngrok() -> tokio::process::Child {
-    #[cfg(target_os="windows")]{
-        Command::new("sub/windows/ngrok.exe").arg("http").arg("3000").stdout(Stdio::null()).spawn().unwrap()
-    }
-    #[cfg(target_os="linux")] {
-        //let ngrok_path = format!("{}/sub/linux/ngrok",std::env::current_dir().unwrap().display());
-        //println!("{}",ngrok_path);
-        //Command::new("ngrok").arg("http").arg("3000").stdout(Stdio::null()).spawn().unwrap()
-        Command::new("ls").spawn().unwrap() //Ngrok is unused, so it will just spawn a useless process instead
+pub fn printout(text: impl std::fmt::Display) {
+    let text = format!("    {}", text);
+    println!("{}", text);
+    if loops::WRITER_TO_CONNECTED.lock().unwrap().is_some() {
+
+
+
+        
+        let mut lock = loops::WRITER_TO_CONNECTED.lock().unwrap();
+        let option = lock.as_mut();
+        let writer = option.unwrap();
+
+        let bytes = text.as_str();
+        let length = [bytes.len() as u8];
+
+
+        let write_task = writer.write(&length);
+        match executor::block_on(write_task) {
+            Ok(_) => (),
+            Err(_) => return,
+        }
+        let write_task = writer.write(bytes.as_bytes());
+        match executor::block_on(write_task) {
+            Ok(_) => (),
+            Err(_) => return,
+        }
     }
 }

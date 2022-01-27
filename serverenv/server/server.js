@@ -4,13 +4,13 @@ const app = express()
 const fs = require("fs")
 const os = require('os')
 
-app.use(express.static('server/public'))
+app.use(express.static('serverenv/server/public'))
 
 var visists_this_up = 0;
 var up_start = Date.now();
 
 app.get('/', (req, res) => {
-    const buffer = fs.readFileSync("server/public/Homepage.html");
+    const buffer = fs.readFileSync("serverenv/server/public/Homepage.html");
     let fileContent = buffer.toString();
     fileContent = fileContent.replace("{hostname}",os.hostname());
 

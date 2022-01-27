@@ -1,9 +1,10 @@
-use std::{panic, time::Duration};
+use std::{panic, sync::Mutex, time::Duration};
 
-use tokio::io::AsyncReadExt;
 use crate::control::commands::handle_command;
+use once_cell::sync::Lazy;
+use tokio::{io::{AsyncReadExt, AsyncWriteExt}, net::tcp::OwnedWriteHalf};
 
-use super::{EnviromentState, Runstate};
+use super::{printout, EnviromentState, Runstate};
 
 pub async fn io_read_loop(enviroment_state: EnviromentState) {
     let stdin = async_std::io::stdin();
@@ -29,16 +30,24 @@ pub async fn io_read_loop(enviroment_state: EnviromentState) {
             _ = check_running(enviroment_state.clone()) => {}
         };
     }
-    println!("    Io reading loop exited");
 }
+pub static WRITER_TO_CONNECTED: Lazy<Mutex<Option<OwnedWriteHalf>>> =
+    Lazy::new(|| Mutex::new(None));
 
 pub async fn tcp_read_loop(enviroment_state: EnviromentState) {
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
+    let listener;
+    match tokio::net::TcpListener::bind("0.0.0.0:8080").await {
+        Ok(res_listener) => listener = res_listener,
+        Err(err) => {
+            printout(format!("Failed to start tcp reading loop err: {}", err));
+            return;
+        }
+    }
     let addr = listener.local_addr().unwrap();
     let port = String::from(&format!("{}", &addr)[8..]);
 
     let print_addr;
-    #[cfg(target_os="windows")]
+    #[cfg(target_os = "windows")]
     {
         print_addr = format!(
             "{}:{}",
@@ -46,35 +55,70 @@ pub async fn tcp_read_loop(enviroment_state: EnviromentState) {
             port
         );
     }
-    #[cfg(target_os="linux")]
+    #[cfg(target_os = "linux")]
     {
-        print_addr = format!(
-            "{}:{}",local_ip_address::local_ip().unwrap(),port
-        );
+        print_addr = format!("{}:{}", local_ip_address::local_ip().unwrap(), port);
     }
 
-    
-    println!("Listening for commands on: {}", print_addr);
+    printout(format!("Listening for commands on: {}", print_addr));
     loop {
         //For now can only accent a single command per connection
         tokio::select! {
             conn = listener.accept() => {
-                let (mut socket, addr) = conn.unwrap();
+                let (stream, addr) = conn.unwrap();
 
-                let mut read_buffer = String::new();
+                printout(format!("Connected to: {}",addr));
 
-                socket.read_to_string(&mut read_buffer).await.unwrap();
+                let (mut reader, writer) = stream.into_split();
 
-                let command = read_buffer[..read_buffer.chars().count()-2].to_string();
-                println!("Remotely recived \"{}\" from {}",command,addr);
-                enviroment_state.command_queue.lock().unwrap().push(command);
+                *WRITER_TO_CONNECTED.lock().unwrap() = Some(writer);
+
+                loop {
+
+                    let mut message_size_buffer = [0u8];
+                    let message_size;
+                    let res = reader.read_exact(&mut message_size_buffer).await;
+
+                    match res {
+                        Ok(_) => message_size = message_size_buffer[0],
+                        Err(err) => {
+                            printout(format!("Error from {} caused disconnect: {}",addr,err));
+                            break;
+                        }
+                    }
+                    let mut message_buffer = vec![0u8;message_size as usize];
+
+                    let res = reader.read_exact(&mut message_buffer).await;
+
+
+                    match res {
+                        Ok(_) => (),
+                        Err(err) => {
+                            printout(format!("Error from {} caused disconnect: {}",addr,err));
+                            break;
+                        }
+                    }
+
+                    let command = std::str::from_utf8(&message_buffer).unwrap();
+
+                    printout(format!("Remotely recived \"{}\" from {}",command,addr));
+
+                    if command.eq("cmd_exit") {
+                        break;
+                    }
+                    enviroment_state.command_queue.lock().unwrap().push(command.to_string());
+
+                    if command.eq("env_exit") {
+                        break;
+                    }
+                }
+                printout(format!("Disconnected from {}",addr));
             }
             _ = check_running(enviroment_state.clone()) => {
                 break;
             }
         }
     }
-    println!("    Tcp reading loop exited");
 }
 
 pub async fn command_executor_loop(enviroment_state: EnviromentState) {
@@ -117,7 +161,6 @@ pub async fn command_executor_loop(enviroment_state: EnviromentState) {
         }
         handle_command(command_sign, args, enviroment_state.clone()).await;
     }
-    println!("    Command executor loop exited");
 }
 
 async fn check_running(enviroment_state: EnviromentState) {
