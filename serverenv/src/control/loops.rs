@@ -2,7 +2,7 @@ use std::{panic, sync::Mutex, time::Duration};
 
 use crate::control::commands::handle_command;
 use once_cell::sync::Lazy;
-use tokio::{io::{AsyncReadExt, AsyncWriteExt}, net::tcp::OwnedWriteHalf};
+use tokio::{io::AsyncReadExt, net::tcp::OwnedWriteHalf};
 
 use super::{printout, EnviromentState, Runstate};
 

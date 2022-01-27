@@ -57,6 +57,6 @@ async fn main() {
         Some(writer) => match writer.shutdown() {
             _ => {}
         },
-        None => todo!(),
+        None => {},
     }
 }
