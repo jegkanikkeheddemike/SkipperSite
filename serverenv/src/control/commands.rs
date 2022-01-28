@@ -98,7 +98,10 @@ fn host_shutdown(_args: Vec<String>, _enviroment_state: EnviromentState){
     }
 }
 
-fn env_update(args: Vec<String>, enviroment_state: EnviromentState) {
-    Command::new("./serverenv/update_run.bash").spawn().unwrap();
-    env_exit(args, enviroment_state);
+fn env_update(_args: Vec<String>, _enviroment_state: EnviromentState) {
+    printout("TRYING TO RUN ENV_UPDATE, THIS DOES NOT YET WORK!!");
+    #[cfg(target_os = "linux")] {
+        Command::new("./serverenv/update_run.bash").spawn().unwrap();
+        env_exit(_args, _enviroment_state);
+    }
 }
