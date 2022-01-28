@@ -87,7 +87,7 @@ fn host_shutdown(_args: Vec<String>, _enviroment_state: EnviromentState){
     #[cfg(target_os="linux")] {
         match Command::new("sudo").arg("shutdown").spawn() {
             Ok(_) => {
-                env_exit(args, _enviroment_state);
+                env_exit(_args, _enviroment_state);
             },
             Err(err) => printout(format!("shutdown failed with error {}",err))
         }   
