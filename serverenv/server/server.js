@@ -24,8 +24,6 @@ app.get('/', (req, res) => {
     res.send(fileContent);
 })
 
-monke()
-
 app.listen(port, () => {
     console.log(`    Server listening at on ${port}`)
 })
