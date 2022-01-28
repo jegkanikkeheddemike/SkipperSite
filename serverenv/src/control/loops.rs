@@ -2,7 +2,7 @@ use std::{
     net::SocketAddr,
     panic,
     sync::Mutex,
-    time::Duration,
+    time::Duration, io::Error,
 };
 
 use crate::control::commands::handle_command;
@@ -81,15 +81,11 @@ pub async fn tcp_io_loop(enviroment_state: EnviromentState) {
 
                 let (mut reader, mut writer) = stream.into_split();
                 loop {
-
                     tokio::select! {
                         command = tcp_read(&mut reader,addr) => {
                             if command.as_str().eq("ERR"){
-                                continue;
+                                break;
                             }
-
-                            
-
                             match command.as_str() {
                                 "env_exit" => {
                                     enviroment_state.command_queue.lock().unwrap().push(command);
@@ -104,7 +100,11 @@ pub async fn tcp_io_loop(enviroment_state: EnviromentState) {
                             }
                         }
                         print = wait_for_tcp_output() => {
-                            tcp_write(&mut writer,print).await;
+                            let res = tcp_write(&mut writer,print).await;
+                            if res.is_err() {
+                                printout("Error writing to tcp. Disconnecting from client");
+                                break;
+                            }
                         }
                         _ = check_running(enviroment_state.clone()) => {
                             break;
@@ -165,18 +165,25 @@ async fn wait_for_tcp_output() -> String {
     }
 }
 
-async fn tcp_write(writer: &mut OwnedWriteHalf, print: String) {
+async fn tcp_write(writer: &mut OwnedWriteHalf, print: String) -> Result<(),Error> {
     let message_bytes = print.as_str().as_bytes();
     let message_length = message_bytes.len();
 
     match writer.write(&[message_length as u8]).await {
         Ok(_) => {},
-        Err(_) => printout(format!("tcp failed to write \"{}\" (forcefully disconnected)",&print)),
+        Err(err) => {
+            printout(format!("tcp failed to write \"{}\" (forcefully disconnected)",&print));
+            return Err(err)
+        },  
     }
     match writer.write(message_bytes).await {
         Ok(_) => {},
-        Err(_) => printout(format!("tcp failed to write \"{}\" (forcefully disconnected)",&print)),
+        Err(err) => {
+            printout(format!("tcp failed to write \"{}\" (forcefully disconnected)",&print));
+            return Err(err);
+        }
     }
+    Ok(())
 }
 
 pub async fn command_executor_loop(enviroment_state: EnviromentState) {
