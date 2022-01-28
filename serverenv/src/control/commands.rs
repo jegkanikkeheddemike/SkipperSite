@@ -1,6 +1,7 @@
 use std::fs::remove_file;
 use std::{thread, time::Duration, fs::File};
 use std::io::prelude::*;
+use tokio::process::Command;
 #[cfg(target_os="linux")]
     use tokio::process::Command;
 
@@ -16,6 +17,7 @@ pub async fn handle_command(
 ) {
     match command_sign.to_lowercase().as_ref() {
         "env_exit" => env_exit(args, enviroment_state),
+        "env_update" => env_update(args, enviroment_state),
         "restart" => restart(args, enviroment_state),
         "reload" => reload(args, enviroment_state).await,
         "host_shutdown" => host_shutdown(args,enviroment_state),
@@ -97,4 +99,9 @@ fn host_shutdown(_args: Vec<String>, _enviroment_state: EnviromentState){
     #[cfg(target_os="windows")] {
         printout("host_shutdown only supported on linux");
     }
+}
+
+fn env_update(args: Vec<String>, enviroment_state: EnviromentState) {
+    Command::new("./serverenv/update_run.bash").spawn().unwrap();
+    env_exit(args, enviroment_state);
 }
