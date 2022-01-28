@@ -25,7 +25,10 @@ pub async fn handle_command(
 
 fn restart(_args: Vec<String>, enviroment_state: EnviromentState) {
     let mut child_processs = enviroment_state.server_process.lock().unwrap();
-    child_processs.start_kill().unwrap();
+    match child_processs.start_kill() {
+        Ok(_) => {},
+        Err(_) => {printout("server process already dead")},
+    }
 
     while child_processs.try_wait().unwrap().is_none() {
         thread::sleep(Duration::from_secs_f32(0.1));
@@ -34,7 +37,6 @@ fn restart(_args: Vec<String>, enviroment_state: EnviromentState) {
     printout(format!("    Server exited with {}", exit_status));
 
     *child_processs = control::spawn_server();
-    printout("    Server restarted");
 }
 
 fn env_exit(_args: Vec<String>, enviroment_state: EnviromentState) {

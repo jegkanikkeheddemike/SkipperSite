@@ -24,9 +24,13 @@ app.get('/', (req, res) => {
     res.send(fileContent);
 })
 
+monke()
+
 app.listen(port, () => {
-    console.log(`    Server listening at http://localhost:${port}`)
+    console.log(`    Server listening at on ${port}`)
 })
+
+
 
 function get_now() {
     let date = new Date();
