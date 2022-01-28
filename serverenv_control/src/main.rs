@@ -10,11 +10,16 @@ async fn main() {
     println!("enter target ip");
     stdin.read_line(&mut address).await.unwrap();
     address = address[..address.chars().count() - 2].to_string();
-    println!("READ: {:?}", address);
 
-    let stream = tokio::net::TcpStream::connect(format!("{}:8080", address))
-        .await
-        .unwrap();
+    let stream;
+    match tokio::net::TcpStream::connect(format!("{}:8080", address)).await {
+        Ok(res_stream) => stream = res_stream,
+        Err(_) => {
+            println!("Failed to connect to target ip\nPress ENTER to exit");
+            stdin.read_line(&mut String::new()).await.unwrap();
+            return;
+        },
+    }
 
     let (mut reader, mut writer) = stream.into_split();
 
