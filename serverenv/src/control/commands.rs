@@ -1,7 +1,8 @@
 use std::fs::remove_file;
 use std::{thread, time::Duration, fs::File};
 use std::io::prelude::*;
-use tokio::process::Command;
+#[cfg(target_os="linux")]
+    use tokio::process::Command;
 use crate::control;
 use crate::control::Runstate;
 
