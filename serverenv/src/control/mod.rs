@@ -1,12 +1,8 @@
-use std::{
-    sync::{Arc, Mutex},
-};
+use std::sync::{Arc, Mutex};
 
-use ::futures::executor;
-use tokio::{
-    io::AsyncWriteExt,
-    process::{Child, Command},
-}; // 1.3.1
+use chrono::{Datelike, Timelike};
+use tokio::process::{Child, Command};
+
 pub mod commands;
 pub mod loops;
 
@@ -45,30 +41,17 @@ pub fn spawn_server() -> tokio::process::Child {
 }
 
 pub fn printout(text: impl std::fmt::Display) {
-    let text = format!("    {}", text);
+    let time = chrono::prelude::Local::now();
+    let time = format!(
+        "{}-{}-{} {}:{}:{}",
+        time.year(),
+        time.month(),
+        time.day(),
+        time.hour(),
+        time.minute(),
+        time.second()
+    );
+    let text = format!("{} || {}", text, time);
     println!("{}", text);
-    if loops::WRITER_TO_CONNECTED.lock().unwrap().is_some() {
-
-
-
-        
-        let mut lock = loops::WRITER_TO_CONNECTED.lock().unwrap();
-        let option = lock.as_mut();
-        let writer = option.unwrap();
-
-        let bytes = text.as_str();
-        let length = [bytes.len() as u8];
-
-
-        let write_task = writer.write(&length);
-        match executor::block_on(write_task) {
-            Ok(_) => (),
-            Err(_) => return,
-        }
-        let write_task = writer.write(bytes.as_bytes());
-        match executor::block_on(write_task) {
-            Ok(_) => (),
-            Err(_) => return,
-        }
-    }
+    loops::TCP_PRINTQUEUE.lock().unwrap().push(text);
 }

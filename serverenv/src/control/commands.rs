@@ -1,4 +1,8 @@
-use std::{thread, time::Duration};
+use std::fs::remove_file;
+use std::{thread, time::Duration, fs::File};
+use std::io::prelude::*;
+#[cfg(target_os="linux")]
+    use tokio::process::Command;
 
 use crate::control;
 use crate::control::Runstate;
@@ -14,6 +18,7 @@ pub async fn handle_command(
         "env_exit" => env_exit(args, enviroment_state),
         "restart" => restart(args, enviroment_state),
         "reload" => reload(args, enviroment_state).await,
+        "host_shutdown" => host_shutdown(args,enviroment_state),
         c => printout(format!("    Failed to run command \"{}\"", c)),
     }
 }
@@ -46,7 +51,24 @@ async fn reload(args: Vec<String>, enviroment_state: EnviromentState) {
         let mut lock = enviroment_state.server_process.lock().unwrap();
         lock.start_kill().unwrap();
     }
+
+    //Once we can delete and remake the server.js file we know we can replace it with directtransfer!
+    let mut file = File::open("./serverenv/server/server.js").unwrap();
+    let mut file_content = String::new(); 
+    file.read_to_string(&mut file_content).unwrap();
+    let mut res = false;
+    while !res {
+        let success= remove_file("./serverenv/server/server.js");
+        res = success.is_ok();
+    }
+
+    let mut serverjs = File::create("./serverenv/server/server.js").unwrap();
+    serverjs.write_all(file_content.as_str().as_bytes()).unwrap();
+
+    printout("    Server process ended");
+
     printout("    beginning download of new server version");
+    
 
     match directtransfer::transfer::leech::leech(&[args[0].clone(), "./serverenv".to_string()], |text| {
         printout(format!("{}", text))
@@ -59,4 +81,18 @@ async fn reload(args: Vec<String>, enviroment_state: EnviromentState) {
 
     let mut child_processs = enviroment_state.server_process.lock().unwrap();
     *child_processs = control::spawn_server();
+}
+
+fn host_shutdown(_args: Vec<String>, _enviroment_state: EnviromentState){
+    #[cfg(target_os="linux")] {
+        match Command::new("sudo").arg("shutdown").spawn() {
+            Ok(_) => {
+                env_exit(args, enviroment_state);
+            },
+            Err(err) => printout(format!("shutdown failed with error {}",err))
+        }   
+    }
+    #[cfg(target_os="windows")] {
+        printout("host_shutdown only supported on linux");
+    }
 }

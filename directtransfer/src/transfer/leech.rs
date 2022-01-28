@@ -54,6 +54,8 @@ pub fn leech(args: &[String], output: fn(print: String)) -> Result<(), Error> {
     output(format!("{}", transfer_meta_data));
 
     for _ in 0..transfer_meta_data.fileamount {
+        
+
         //Read the size of the file meta data as u16 as two bytes
         let mut file_meta_data_size_buffer = [0u8; 2];
         stream.read_exact(&mut file_meta_data_size_buffer).unwrap();
@@ -129,6 +131,7 @@ pub fn leech(args: &[String], output: fn(print: String)) -> Result<(), Error> {
             file.seek_write(&last_chunk_bytes, offset)?;
         }
         total_transferred += file_meta_data.last_chunk_size as u64;
+
 
         transfer::check_progress(
             total_transferred,

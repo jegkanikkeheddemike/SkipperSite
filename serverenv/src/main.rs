@@ -1,6 +1,6 @@
-use control::{loops, printout};
+use control::{printout};
 use std::sync::{Arc, Mutex};
-use tokio::{self, io::AsyncWriteExt};
+use tokio::{self};
 
 use crate::control::{EnviromentState, Runstate};
 
@@ -18,7 +18,7 @@ async fn main() {
         server_process,
     };
 
-    let tcp_read_loop = tokio::spawn(control::loops::tcp_read_loop(enviroment_state.clone()));
+    let tcp_io_loop = tokio::spawn(control::loops::tcp_io_loop(enviroment_state.clone()));
     let io_read_loop = tokio::spawn(control::loops::io_read_loop(enviroment_state.clone()));
     let command_executor_loop = tokio::spawn(control::loops::command_executor_loop(
         enviroment_state.clone(),
@@ -42,21 +42,9 @@ async fn main() {
         Ok(_) => printout("io read loop exited sucessfully"),
         Err(_) => printout("io read loop exited poisoned"),
     }
-    match tcp_read_loop.await {
-        Ok(_) => printout("tcp read loop exited sucessfully"),
-        Err(_) => printout("tcp read loop exited poisoned"),
-    }
 
-
-
-    //If is connected to command giver, then shut down connection
-    let mut lock = loops::WRITER_TO_CONNECTED.lock().unwrap();
-    let option = lock.as_mut();
-
-    match option {
-        Some(writer) => match writer.shutdown() {
-            _ => {}
-        },
-        None => {},
+    match tcp_io_loop.await {
+        Ok(_) => printout("tcp io loop exited sucessfully"),
+        Err(_) => printout("tcp io loop exited poisoned"),
     }
 }
