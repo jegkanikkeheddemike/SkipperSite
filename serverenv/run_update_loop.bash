@@ -5,5 +5,5 @@ looping=true
 while $looping; do
     git reset --hard
     git pull
-    $HOME/.cargo/bin/cargo run --bin serverenv --release || $looping = false
+    $HOME/.cargo/bin/cargo run --bin serverenv --release || looping=false
 done

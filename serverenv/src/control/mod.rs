@@ -4,6 +4,7 @@ use std::{
 };
 
 use chrono::{Datelike, Timelike};
+use once_cell::sync::Lazy;
 use tokio::{
     io::AsyncReadExt,
     process::{Child, Command},
@@ -111,3 +112,5 @@ pub fn printout(text: impl std::fmt::Display) {
     println!("{}", text);
     loops::TCP_PRINTQUEUE.lock().unwrap().push(text);
 }
+
+pub static REPEAT_ON_EXIT:Lazy<Mutex<bool>> = Lazy::new(|| Mutex::new(false));

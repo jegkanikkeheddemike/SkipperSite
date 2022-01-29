@@ -1,5 +1,5 @@
 use control::{printout};
-use std::sync::{Arc, Mutex};
+use std::{sync::{Arc, Mutex}, io::{Error, ErrorKind}};
 use tokio::{self};
 
 use crate::control::{EnviromentState, Runstate};
@@ -7,7 +7,7 @@ use crate::control::{EnviromentState, Runstate};
 mod control;
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(),Error> {
     let server_process = Arc::new(Mutex::new(control::spawn_server()));
     let runstate = Arc::new(Mutex::new(Runstate::Running));
     let command_queue = Arc::new(Mutex::new(deadqueue::unlimited::Queue::<String>::new()));
@@ -46,5 +46,11 @@ async fn main() {
     match tcp_io_loop.await {
         Ok(_) => printout("tcp io loop exited sucessfully"),
         Err(_) => printout("tcp io loop exited poisoned"),
+    }
+
+
+    match control::REPEAT_ON_EXIT.lock().unwrap().to_owned() {
+        true => Ok(()),
+        false => Err(Error::new(ErrorKind::Other, "Error to exit")),
     }
 }
