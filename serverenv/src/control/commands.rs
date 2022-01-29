@@ -19,6 +19,7 @@ pub async fn handle_command(
         "restart" => restart(args, enviroment_state),
         "reload" => reload(args, enviroment_state).await,
         "host_shutdown" => host_shutdown(args,enviroment_state),
+        "env_panic" => panic!("panic test"), 
         c => printout(format!("    Failed to run command \"{}\"", c)),
     }
 }
