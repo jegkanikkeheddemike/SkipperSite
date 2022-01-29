@@ -1,5 +1,6 @@
 use crate::control::{EnviromentState, Runstate};
-use control::printout;
+use control::{printout};
+use once_cell::sync::Lazy;
 use std::panic;
 use std::{
     io::{Error, ErrorKind},
@@ -8,10 +9,14 @@ use std::{
 use tokio::{self};
 mod control;
 
+pub static ENVIROMENT_STATE: Lazy<Mutex<Option<EnviromentState>>> = Lazy::new(||Mutex::new(None));
+
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     panic::set_hook(Box::new(|panic_info| {
-        printout(panic_info);
+        printout(format!("{}\nAttempting to close env",panic_info));
+        *control::REPEAT_ON_EXIT.lock().unwrap() = true;
+        *ENVIROMENT_STATE.lock().unwrap().as_ref().unwrap().runstate.lock().unwrap() = Runstate::Closing;
     }));
 
     let server_process = Arc::new(Mutex::new(control::spawn_server()));
@@ -23,6 +28,7 @@ async fn main() -> Result<(), Error> {
         runstate,
         server_process,
     };
+    *ENVIROMENT_STATE.lock().unwrap() = Some(enviroment_state.clone());
 
     let tcp_io_loop = tokio::spawn(control::loops::tcp_io_loop(enviroment_state.clone()));
     let io_read_loop = tokio::spawn(control::loops::io_read_loop(enviroment_state.clone()));
