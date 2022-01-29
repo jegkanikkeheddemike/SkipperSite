@@ -4,6 +4,6 @@ looping=true
 #and shut down
 while $looping; do
     git reset --hard
-    git pull
+    sudo git pull
     /home/$USER/.cargo/bin/cargo run --bin serverenv --release || looping=false
 done
