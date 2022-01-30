@@ -1,10 +1,9 @@
-use std::fs::remove_file;
-use std::{thread, time::Duration, fs::File};
-use std::io::prelude::*;
+use std::{thread, time::Duration};
 #[cfg(target_os="linux")]
     use tokio::process::Command;
 use crate::control;
 use crate::control::Runstate;
+use futures::executor;
 
 use super::{EnviromentState, printout};
 
@@ -52,22 +51,8 @@ async fn reload(args: Vec<String>, enviroment_state: EnviromentState) {
     }
     {
         let mut lock = enviroment_state.server_process.lock().unwrap();
-        lock.start_kill().unwrap();
+        executor::block_on(lock.kill()).unwrap();
     }
-
-    //Once we can delete and remake the server.js file we know we can replace it with directtransfer!
-    let mut file = File::open("./serverenv/server/server.js").unwrap();
-    let mut file_content = String::new(); 
-    file.read_to_string(&mut file_content).unwrap();
-    let mut res = false;
-    while !res {
-        let success= remove_file("./serverenv/server/server.js");
-        res = success.is_ok();
-    }
-
-    let mut serverjs = File::create("./serverenv/server/server.js").unwrap();
-    serverjs.write_all(file_content.as_str().as_bytes()).unwrap();
-
     printout("    Server process ended");
 
     printout("    beginning download of new server version");
