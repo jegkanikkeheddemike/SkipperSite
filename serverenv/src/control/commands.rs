@@ -3,7 +3,6 @@ use std::{thread, time::Duration};
     use tokio::process::Command;
 use crate::control;
 use crate::control::Runstate;
-use futures::executor;
 
 use super::{EnviromentState, printout};
 
@@ -51,9 +50,28 @@ async fn reload(args: Vec<String>, enviroment_state: EnviromentState) {
     }
     {
         let mut lock = enviroment_state.server_process.lock().unwrap();
-        executor::block_on(lock.kill()).unwrap();
+        lock.start_kill().unwrap();
     }
-    printout("    Server process ended");
+
+    loop {
+        let res;
+        {
+            let mut lock = enviroment_state.server_process.lock().unwrap();
+            res = lock.try_wait().unwrap();
+        }
+        match res {
+            Some(exit_status) => {
+                printout(format!("Server exited with status {}",exit_status));
+                break;
+            },
+            None => {
+                tokio::time::sleep(Duration::from_millis(10)).await;
+                continue;
+            },
+        }
+
+        
+    }
 
     printout("    beginning download of new server version");
     
