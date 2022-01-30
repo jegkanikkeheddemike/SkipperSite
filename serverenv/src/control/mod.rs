@@ -1,4 +1,5 @@
 use std::{
+    fs, path,
     process::Stdio,
     sync::{Arc, Mutex},
 };
@@ -9,6 +10,7 @@ use tokio::{
     io::AsyncReadExt,
     process::{Child, Command},
 };
+use std::io::Write;
 
 pub mod commands;
 pub mod loops;
@@ -83,7 +85,7 @@ pub fn spawn_server() -> tokio::process::Child {
                     continue;
                 }
 
-                printout(format!("{}",line));
+                printout(format!("{}", line));
                 line = String::new();
                 continue;
             } else if char == '\r' || char == '^' {
@@ -96,6 +98,7 @@ pub fn spawn_server() -> tokio::process::Child {
 
     child
 }
+
 
 pub fn printout(text: impl std::fmt::Display) {
     let time = chrono::prelude::Local::now();
@@ -110,7 +113,16 @@ pub fn printout(text: impl std::fmt::Display) {
     );
     let text = format!("{} || {}", text, time);
     println!("{}", text);
-    loops::TCP_PRINTQUEUE.lock().unwrap().push(text);
+
+    if !path::Path::new("./serverenv/logs.txt").exists() {
+        fs::File::create("./serverenv/logs.txt").unwrap();
+    }
+    let mut file = fs::OpenOptions::new()
+        .append(true)
+        .open("./serverenv/logs.txt")
+        .unwrap();
+
+    writeln!(file,"{}", text).unwrap();
 }
 
-pub static REPEAT_ON_EXIT:Lazy<Mutex<bool>> = Lazy::new(|| Mutex::new(false));
+pub static REPEAT_ON_EXIT: Lazy<Mutex<bool>> = Lazy::new(|| Mutex::new(false));

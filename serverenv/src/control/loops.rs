@@ -1,12 +1,7 @@
-use std::{
-    net::SocketAddr,
-    panic,
-    sync::Mutex,
-    time::Duration, io::Error,
-};
+use std::{fs, io::Error, net::SocketAddr, panic, time::Duration};
 
 use crate::control::commands::handle_command;
-use once_cell::sync::Lazy;
+
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     net::tcp::{OwnedReadHalf, OwnedWriteHalf},
@@ -33,16 +28,13 @@ pub async fn io_read_loop(enviroment_state: EnviromentState) {
                 #[cfg(target_os="linux")]{
                     command = input_line[..input_line.chars().count()-1].to_string();
                 }
-                TCP_PRINTQUEUE.lock().unwrap().push(format!("Locally recieved: {}",&command));
+                printout(format!("Locally recieved: {}",&command));
                 enviroment_state.command_queue.lock().unwrap().push(command);
             }
             _ = check_running(enviroment_state.clone()) => {}
         };
     }
 }
-
-pub static TCP_PRINTQUEUE: Lazy<Mutex<deadqueue::unlimited::Queue<String>>> =
-    Lazy::new(|| Mutex::new(deadqueue::unlimited::Queue::new()));
 
 pub async fn tcp_io_loop(enviroment_state: EnviromentState) {
     let listener;
@@ -90,7 +82,7 @@ pub async fn tcp_io_loop(enviroment_state: EnviromentState) {
                                 "env_exit" => {
                                     enviroment_state.command_queue.lock().unwrap().push(command);
                                     break;
-                                }, 
+                                },
                                 "cmd_exit" => {
                                     break;
                                 }
@@ -99,8 +91,8 @@ pub async fn tcp_io_loop(enviroment_state: EnviromentState) {
                                 }
                             }
                         }
-                        print = wait_for_tcp_output() => {
-                            let res = tcp_write(&mut writer,print).await;
+                        print_list = wait_for_tcp_output() => {
+                            let res = tcp_write(&mut writer,print_list).await;
                             if res.is_err() {
                                 printout("Error writing to tcp. Disconnecting from client");
                                 break;
@@ -150,37 +142,49 @@ async fn tcp_read(reader: &mut OwnedReadHalf, addr: SocketAddr) -> String {
     command
 }
 
-async fn wait_for_tcp_output() -> String {
+async fn wait_for_tcp_output() -> Vec<String> {
     loop {
-        let res;
-        {
-            res = TCP_PRINTQUEUE.lock().unwrap().try_pop();
+        tokio::time::sleep(Duration::from_millis(10)).await;
+        let file_string;
+        match fs::read_to_string("./serverenv/logs.txt") {
+            Ok(res) => file_string = res,
+            Err(_) => continue,
         }
-        match res {
-            Some(print) => return print,
-            None => {
-                tokio::time::sleep(Duration::from_millis(10)).await;
-            }
+        let mut file_string_array = Vec::new();
+        for line in file_string.split("\n") {
+            file_string_array.push(String::from(line));
+        }
+        if !file_string.is_empty() {
+            fs::File::create("./serverenv/logs.txt").unwrap(); //Deletes the content of the logs
+            return file_string_array;
         }
     }
 }
 
-async fn tcp_write(writer: &mut OwnedWriteHalf, print: String) -> Result<(),Error> {
-    let message_bytes = print.as_str().as_bytes();
-    let message_length = message_bytes.len();
+async fn tcp_write(writer: &mut OwnedWriteHalf, print_list: Vec<String>) -> Result<(), Error> {
+    for print in print_list {
+        let message_bytes = print.as_str().as_bytes();
+        let message_length = message_bytes.len();
 
-    match writer.write(&[message_length as u8]).await {
-        Ok(_) => {},
-        Err(err) => {
-            printout(format!("tcp failed to write \"{}\" (forcefully disconnected)",&print));
-            return Err(err)
-        },  
-    }
-    match writer.write(message_bytes).await {
-        Ok(_) => {},
-        Err(err) => {
-            printout(format!("tcp failed to write \"{}\" (forcefully disconnected)",&print));
-            return Err(err);
+        match writer.write(&[message_length as u8]).await {
+            Ok(_) => {}
+            Err(err) => {
+                printout(format!(
+                    "tcp failed to write \"{}\" (forcefully disconnected)",
+                    &print
+                ));
+                return Err(err);
+            }
+        }
+        match writer.write(message_bytes).await {
+            Ok(_) => {}
+            Err(err) => {
+                printout(format!(
+                    "tcp failed to write \"{}\" (forcefully disconnected)",
+                    &print
+                ));
+                return Err(err);
+            }
         }
     }
     Ok(())
