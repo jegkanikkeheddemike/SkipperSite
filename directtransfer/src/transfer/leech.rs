@@ -1,11 +1,11 @@
+#[cfg(target_os = "linux")]
+use std::os::unix::fs::FileExt;
+#[cfg(target_os = "windows")]
+use std::os::windows::prelude::FileExt;
 use std::{
     io::{Error, Read, Write},
     net::TcpStream,
 };
-#[cfg(target_os = "windows")] 
-    use std::os::windows::prelude::FileExt;
-#[cfg(target_os="linux")]
-    use std::os::unix::fs::FileExt;
 
 use crate::{
     settings,
@@ -19,7 +19,7 @@ pub fn leech(args: &[String], output: fn(print: String)) -> Result<(), Error> {
     let mut output_dir = &settings::output_path();
     if args.len() > 1 {
         output_dir = &args[1];
-        output(format!("Settings ignored, using {} instead",output_dir));
+        output(format!("Settings ignored, using {} instead", output_dir));
     }
 
     let mut progress = 0u8;
@@ -27,7 +27,7 @@ pub fn leech(args: &[String], output: fn(print: String)) -> Result<(), Error> {
 
     output("STATUS: Connecting".to_string());
 
-    println!("IP: {}",target_ip);
+    println!("IP: {}", target_ip);
 
     let mut stream = TcpStream::connect(target_ip)?;
 
@@ -54,8 +54,6 @@ pub fn leech(args: &[String], output: fn(print: String)) -> Result<(), Error> {
     output(format!("{}", transfer_meta_data));
 
     for _ in 0..transfer_meta_data.fileamount {
-        
-
         //Read the size of the file meta data as u16 as two bytes
         let mut file_meta_data_size_buffer = [0u8; 2];
         stream.read_exact(&mut file_meta_data_size_buffer).unwrap();
@@ -71,23 +69,34 @@ pub fn leech(args: &[String], output: fn(print: String)) -> Result<(), Error> {
 
         //create the file
         let mut path;
-        #[cfg(target_os="windows")]
+        #[cfg(target_os = "windows")]
         {
             path = format!("{}\\{}", output_dir, file_meta_data.filename);
-            path = path.replace("/","\\");
+            path = path.replace("/", "\\");
             std::fs::create_dir_all(path.split_at(path.rfind("\\").unwrap()).0)?;
         }
-        #[cfg(target_os="linux")]{
+        #[cfg(target_os = "linux")]
+        {
             path = format!("{}/{}", output_dir, file_meta_data.filename);
             path = path.replace("\\", "/");
             std::fs::create_dir_all(path.split_at(path.rfind("/").unwrap()).0)?;
         }
-        let file = std::fs::OpenOptions::new()
+        let file;
+        match std::fs::OpenOptions::new()
             .read(true)
             .write(true)
             .create(true)
             .open(&path)
-            .unwrap();
+        {
+            Ok(res) => file = res,
+            Err(err) => {
+                output(format!(
+                    "DOWNLING FAILED WITH ERR: {} ON FILE: {}",
+                    err, &path
+                ));
+                panic!("{}", err);
+            }
+        }
 
         //Read all the chunks except the last
         // since the last chunk is another size it needs to be read seperately
@@ -131,7 +140,6 @@ pub fn leech(args: &[String], output: fn(print: String)) -> Result<(), Error> {
             file.seek_write(&last_chunk_bytes, offset)?;
         }
         total_transferred += file_meta_data.last_chunk_size as u64;
-
 
         transfer::check_progress(
             total_transferred,
