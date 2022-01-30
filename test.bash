@@ -1,0 +1,1 @@
+sudo /home/$USER/.cargo/bin/cargo run --bin serverenv --release
