@@ -8,6 +8,7 @@ h1 {
     color: seashell;
     font-size: 500%;
 }
+
 h2 {
     color: seashell;
     font-size: 200%;
@@ -15,20 +16,20 @@ h2 {
 
 .left_menu {
     background-color: rgb(60, 60, 60);
-    width: 30em;
+    width: 300px;
     float: left;
+    height: 100%
 }
 
 .right_menu {
     background-color: rgb(60, 60, 60);
-    width: 30em;
+    width: 300px;
     float: right;
+    height: 100%
 }
 
 .middle_menu {
     width: 100%;
-    margin: 0;
-    padding: 0;
 }
 
 .menu_container {
@@ -40,15 +41,33 @@ h2 {
 
 .chat_name {
     margin: 0;
-    padding: 0;
+    padding-left: 10px;
     background-color: rgb(60, 60, 60);
 }
 
 .chat {
-    padding: 3em;
+    padding-left: 350px;
     height: 100%;
 }
 
 .chat_input {
     padding: 1em;
+    position: absolute;
+    bottom: 10px;
+    left: 300;
+}
+
+.self_message p {
+    /*float: left;*/
+    background-color: blue;
+}
+
+.other_message p {
+    /*float: right;*/
+    background-color: black;
+}
+
+.outer_message {
+    background-color: azure;
+    width: 100%;
 }
