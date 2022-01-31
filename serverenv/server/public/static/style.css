@@ -1,5 +1,7 @@
 body {
     background-color: rgb(30, 30, 30);
+    margin: 0;
+    padding: 0;
 }
 
 h1 {
@@ -9,4 +11,44 @@ h1 {
 h2 {
     color: seashell;
     font-size: 200%;
+}
+
+.left_menu {
+    background-color: rgb(60, 60, 60);
+    width: 30em;
+    float: left;
+}
+
+.right_menu {
+    background-color: rgb(60, 60, 60);
+    width: 30em;
+    float: right;
+}
+
+.middle_menu {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.menu_container {
+    width: 100%;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+}
+
+.chat_name {
+    margin: 0;
+    padding: 0;
+    background-color: rgb(60, 60, 60);
+}
+
+.chat {
+    padding: 3em;
+    height: 100%;
+}
+
+.chat_input {
+    padding: 1em;
 }
