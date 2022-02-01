@@ -42,20 +42,20 @@ app.get('/chat',(req,res) => {
 })
 
 function get_database() {
-    if (!fs.existsSync("./chatdb.json")) {
-        fs.writeFileSync("./chatdb.json", JSON.stringify(
+    if (!fs.existsSync("./serverenv/chatdb.json")) {
+        fs.writeFileSync("./serverenv/chatdb.json", JSON.stringify(
             {
                 users: [],
                 messages: []
             }
         ));
     }
-    return JSON.parse(fs.readFileSync("./chatdb.json").toString());
+    return JSON.parse(fs.readFileSync("./serverenv/chatdb.json").toString());
 }
 
 function save_database(database) {
     if (database != null) {
-        fs.writeFileSync("./chatdb.json", JSON.stringify(database));
+        fs.writeFileSync("./serverenv/chatdb.json", JSON.stringify(database));
     }
 }
 
