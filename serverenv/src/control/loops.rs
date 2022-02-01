@@ -22,6 +22,9 @@ pub async fn io_read_loop(enviroment_state: EnviromentState) {
         tokio::select! {
             _ = stdin.read_line(&mut input_line) => {
                 let command;
+                if input_line.chars().count() == 0 {
+                    return;
+                }
                 #[cfg(target_os="windows")]{
                     command = input_line[..input_line.chars().count()-2].to_string();
                 }
