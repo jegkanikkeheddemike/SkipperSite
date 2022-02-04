@@ -13,7 +13,7 @@ var app = new Vue({
             let username = "";
             let target_url = location.href + "/api/users/" + user_id;
 
-            
+
             $.getJSON(target_url, (data) => {
                 username = data.username;
             });
@@ -34,11 +34,17 @@ function update_chats() {
 update_chats();
 console.log(app.chats);
 
-function update_messages() {
+async function update_messages() {
     let messages_url = window.location.href + "/api/messages/" + app.uid + "/" + localStorage.getItem("usr_token") + "/" + app.chat_id;
     $.getJSON(messages_url, (data) => {
 
-        app.messages = data;
+        if (app.messages.length != data.length) {
+            app.messages = data;
+            Vue.nextTick(() => {
+                chat.scrollTo(0,chat.scrollHeight);
+            });
+        }
+
     });
 }
 update_messages();
