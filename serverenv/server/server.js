@@ -1,11 +1,16 @@
 const port = 3000;
 const express = require('express')
 const app = express()
+const bodyParser = require('body-parser')
+const crypto = require("crypto")
 const fs = require("fs")
 const os = require('os')
 
 app.use(express.static('serverenv/server/public'))
 app.use(express.json());
+app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+    extended: true
+}));
 
 var visists_this_up = 0;
 var up_start = Date.now();
@@ -36,9 +41,77 @@ function get_now() {
 
 
 //DATABASE AND MESSAGE APP
+app.get('/login', (req, res) => {
+    res.sendFile(__dirname + "/public/Login.html");
+})
 
-app.get('/chat',(req,res) => {
-    res.sendFile(__dirname+"/public/Chat.html");
+app.post('/login', (req, res) => {
+
+    let cred = req.body;
+    let success = false;
+
+    let db = get_database();
+    db.users.forEach(user => {
+        let hashed_pass = crypto.createHash('sha256').update(cred.pswd + user.secret.pass_salt).digest('hex');
+        if (user.client_side.public.username == cred.usrnme && user.secret.password == hashed_pass) {
+            success = true;
+            res.send(JSON.stringify(user.client_side));
+            console.log("LOGGED IN");
+        }
+    });
+    console.log("FAILED LOG IN");
+    if (!success)
+        res.send("LOGIN_ERR");
+})
+
+app.post('/chat/api/users', (req, res) => {
+    let cred = req.body;
+    console.log(cred);
+    if (cred.pswd != cred.c_pswd) {
+        res.send("ERR: Passwords dont match");
+    }
+
+    let db = get_database();
+    //check if a user with the same username exists!
+    db.users.forEach(user => {
+        if (user.client_side.public.username == cred.usrnme) {
+            res.send("ERR: Username already exists");
+        }
+    });
+
+    let pass_salt = make_salt(255);
+    let salted_pass = cred.pswd + pass_salt;
+
+    let hashed_pass = crypto.createHash('sha256').update(salted_pass).digest('hex');
+    console.log("hashed pass: " + hashed_pass);
+
+    let token_salt = make_salt(255);
+    let token = crypto.createHash('sha256').update(cred.usrnme + token_salt).digest('hex');
+    let id = db.next_user_id;
+    db.next_user_id++;
+    let new_user = {
+        client_side: {
+            public: {
+                id: id,
+                username: cred.usrnme
+            },
+            private: {
+                token: token
+            }
+        },
+        secret: {
+            password: hashed_pass,
+            pass_salt: pass_salt
+        }
+    }
+    db.users.push(new_user);
+    save_database(db);
+    res.send(JSON.stringify(new_user.client_side));
+
+})
+
+app.get('/chat', (req, res) => {
+    res.sendFile(__dirname + "/public/Chat.html");
 })
 
 function get_database() {
@@ -63,22 +136,9 @@ function save_database(database) {
 app.get('/chat/api/messages', (req, res) => {
     res.send(get_database().messages)
 })
-app.get('/chat/api/users/:userid',(req,res) => {
+app.get('/chat/api/users/:userid', (req, res) => {
     let userid = req.params.userid;
-    res.send(get_database().users[userid]);
-})
-
-app.post('/chat/api/users', (req, res) => {
-    let body = req.body
-    let db = get_database();
-    let user = {
-        username: body.username,
-        password: body.password,
-        userid: db.users.length
-    }
-    db.users.push(user);
-    save_database(db);
-    res.sendStatus(200);
+    res.send(get_database().users[userid].client_side.public);
 })
 
 app.post('/chat/api/messages', (req, res) => {
@@ -95,3 +155,15 @@ app.post('/chat/api/messages', (req, res) => {
     save_database(db);
     res.sendStatus(200)
 })
+
+
+function make_salt(length) {
+    var result = '';
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for (var i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() *
+            charactersLength));
+    }
+    return result;
+}

@@ -1,10 +1,11 @@
+
 var messages_url = window.location.href + "/api/messages";
 
 var app = new Vue({
     el: '#app',
     data: {
         messages: [],
-        chat_name: "No chat loaded",
+        chat_name: "Temporary chat",
         uid: 0
     }
 });
@@ -55,3 +56,4 @@ function post_message() {
     update_messages();
     chat.scrollTo(0,chat.scrollHeight);
 }
+
