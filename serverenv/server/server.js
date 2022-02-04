@@ -83,7 +83,6 @@ app.post('/chat/api/users', (req, res) => {
     let salted_pass = cred.pswd + pass_salt;
 
     let hashed_pass = crypto.createHash('sha256').update(salted_pass).digest('hex');
-    console.log("hashed pass: " + hashed_pass);
 
     let token_salt = make_salt(64);
     let token = crypto.createHash('sha256').update(cred.usrnme + token_salt).digest('hex');
@@ -214,7 +213,6 @@ app.post('/chat/api/messages/:user_id/:token/:chat_id', (req, res) => {
 
     //first check if the sender has permission
     if (user_id < 0 || chat_id < 0) {
-        console.log(1);
         res.send("Invalid userid or chat id")
         return;
     }
@@ -222,13 +220,11 @@ app.post('/chat/api/messages/:user_id/:token/:chat_id', (req, res) => {
     let db = get_database();
 
     if (db.users[parseInt(user_id)].client_side.private.token != token) {
-        console.log(2)
         res.send("Invalid token");
         return;
     }
 
     if (!db.chats[parseInt(chat_id)].member_ids.includes(parseInt(user_id))) {
-        console.log(3);
         res.send("User does not have access to chat");
         return;
     }
