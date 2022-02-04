@@ -21,14 +21,15 @@
         </div>
         <div class="middle_menu">
             <div class="chat_name">
-               <h2> {{chat_name}}</h2>
+                <h2> {{chat_name}}</h2>
             </div>
-            <div class="chat">
+            <div class="chat" id="chat">
                 <div v-for="message in messages" class="outer_message">
                     <div :class="[uid == message.sender?'self_message':'other_message']">
                         <div class="inner_message">
                             {{ message.message_content }}
                         </div>
+                        <p class="timestamp">{{message.timestamp}}</p>
                     </div>
                 </div>
             </div>

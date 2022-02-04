@@ -53,4 +53,5 @@ function post_message() {
     );
     chat_input_field.value = "";
     update_messages();
+    chat.scrollTo(0,chat.scrollHeight);
 }
