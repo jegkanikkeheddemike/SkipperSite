@@ -2,6 +2,13 @@
 <html lang="en">
 
 <head>
+    <script>
+        //the page only loads proberly if it does NOT end with /chat/, but /chat instead
+        if (window.location.href.endsWith("/")){
+            console.log(window.location);
+            window.location.href = window.location.href.substring(0,window.location.href.length-1);
+        }
+    </script>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +19,7 @@
 </head>
 
 <body>
+
     <div class="menu_container" id="app">
         <div class="left_menu">
             <h1>CHAT MENU</h1>
