@@ -31,7 +31,10 @@ h2 {
 }
 
 .middle_menu {
-    width: 100%;
+    margin: 0;
+    padding: 0;
+    width: calc(100% - 600px);
+    float: left;
 }
 
 .menu_container {
@@ -58,14 +61,33 @@ h2 {
 .chat {
     padding-left: 20px;
     padding-right: 20px;
-    height: calc(100vh - 60px - 60px);
-    width: calc(100% - 600px - 40px);
+    height: calc(100vh - 60px - 40px);
     overflow-y: scroll;
 }
 
 .chat_input {
-    height: 60px;
+    height: 40px;
     background-color: rgb(45, 45, 45);
+    width: 100%;
+}
+
+.chat_input form {
+    height: 100%;
+    padding: 0;
+    margin: 0%;
+}
+
+.chat_input input {
+    margin-left: 5%;
+    margin-right: 5%;
+    padding: 0;
+    height: 100%;
+    width: 90%;
+    font-size: 20px;
+    background-color: darkslateblue;
+    border-radius: 5px;
+    border-color: black;
+    
 }
 
 .self_message {

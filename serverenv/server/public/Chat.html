@@ -4,9 +4,9 @@
 <head>
     <script>
         //the page only loads proberly if it does NOT end with /chat/, but /chat instead
-        if (window.location.href.endsWith("/")){
+        if (window.location.href.endsWith("/")) {
             console.log(window.location);
-            window.location.href = window.location.href.substring(0,window.location.href.length-1);
+            window.location.href = window.location.href.substring(0, window.location.href.length - 1);
         }
     </script>
     <meta charset="UTF-8">
@@ -41,9 +41,10 @@
                     </div>
                 </div>
             </div>
-            <div class="chat_input">
-                <input type="text" id="chat_input_field">
-                <button onclick="post_message()">-></button>
+            <div class="chat_input" >
+                <form onsubmit="post_message(); return false;">
+                    <input type="text" id="chat_input_field">
+                </form>
             </div>
         </div>
     </div>
