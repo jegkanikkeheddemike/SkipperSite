@@ -1,34 +1,52 @@
-
-var messages_url = window.location.href + "/api/messages";
+var chats_url = window.location.href + "/api/chats/" + localStorage.getItem("usr_id") + "/" + localStorage.getItem("usr_token");
 
 var app = new Vue({
     el: '#app',
     data: {
-        messages: [],
-        chat_name: "Temporary chat",
-        uid: 0
+        chats: [],
+        chat_id: -1,
+        uid: localStorage.getItem("usr_id"),
+        messages: []
+    },
+    methods: {
+        get_user: async function (user_id) {
+            let username = "";
+            let target_url = location.href + "/api/users/" + user_id;
+
+            
+            $.getJSON(target_url, (data) => {
+                username = data.username;
+            });
+        }
     }
 });
 
+function update_chats() {
+    $.getJSON(chats_url, (data) => {
+        app.chats = data;
+        if (data.length != 0) {
+            app.chat_id = 0;
+        }
+        update_messages();
+    });
+
+}
+update_chats();
+console.log(app.chats);
+
 function update_messages() {
+    let messages_url = window.location.href + "/api/messages/" + app.uid + "/" + localStorage.getItem("usr_token") + "/" + app.chat_id;
     $.getJSON(messages_url, (data) => {
 
-        app.messages = [];
-
-        data.forEach(element => {
-            app.messages.push(element);
-        });
+        app.messages = data;
     });
 }
 update_messages();
 
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 async function update_loop() {
     while (true) {
-        await sleep(1000);
+        await sleep(2000);
         update_messages();
     }
 }
@@ -36,8 +54,9 @@ async function update_loop() {
 update_loop();
 
 function post_message() {
+    let messages_url = window.location.href + "/api/messages/" + app.uid + "/" + localStorage.getItem("usr_token") + "/" + app.chat_id;
     let formdata = JSON.stringify({
-        userid: 0,
+        userid: app.uid,
         message_content: chat_input_field.value
     });
 
@@ -54,6 +73,5 @@ function post_message() {
     );
     chat_input_field.value = "";
     update_messages();
-    chat.scrollTo(0,chat.scrollHeight);
+    chat.scrollTo(0, chat.scrollHeight);
 }
-

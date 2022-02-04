@@ -58,7 +58,7 @@ h2 {
     text-align: center;
 }
 
-.chat {
+.chat_board {
     padding-left: 20px;
     padding-right: 20px;
     height: calc(100vh - 60px - 40px);
@@ -95,11 +95,22 @@ h2 {
 .self_message {
     float: left;
     clear: both;
+    max-width: 90%;
 }
 
 .other_message {
     float: right;
     clear: both;
+    max-width: 90%;
+}
+
+.username {
+    font-size: large;
+    padding: 0;
+    margin: 0;
+    margin-left: 10px;
+    margin-right: 10px;
+    text-align: right;
 }
 
 .timestamp {
@@ -111,19 +122,14 @@ h2 {
 
 
 .inner_message {
+    font-size: 200%;
     padding: 15px;
-    min-width: 200px;
-    max-width: 40%;
-    overflow-wrap: break-word;
     background-color: darkslateblue;
     margin: 5px;
     border-radius: 10px;
-}
-
-.outer_message {
-    width: 100%;
-    font-size: 200%;
-    background-color: aliceblue;
+    float: inherit;
+    max-width: 100%;
+    overflow-wrap: break-word;
 }
 
 

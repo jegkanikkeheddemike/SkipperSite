@@ -2,7 +2,8 @@ var app = new Vue({
     el: '#app',
     data: {
         failed_login: false,
-        failed_signup: false
+        failed_signup: false,
+        signup_error: ""
     }
 });
 
@@ -18,8 +19,10 @@ $("#signup_form").ajaxForm(function (response) {
 });
 
 function signup(res) {
-    if (res.startsWith("ERR: ")) {
-
+    console.log(res);
+    if (typeof (res) == typeof ("")) {
+        app.failed_signup = true;
+        app.signup_error = res.substring(7);
     } else {
         login(res);
     }
@@ -28,11 +31,11 @@ function signup(res) {
 
 function login(res) {
     console.log(res);
-    if (res == "LOGIN_ERR") {
+    if (typeof (res) == typeof ("")) {
         app.failed_login = true;
     } else {
 
-        let user = JSON.parse(res);
+        let user = res;
 
         console.log(user);
 

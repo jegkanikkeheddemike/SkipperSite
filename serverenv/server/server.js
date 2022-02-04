@@ -39,45 +39,45 @@ function get_now() {
     return date.toDateString() + " " + date.getHours() + ":" + date.getMinutes();
 }
 
-
 //DATABASE AND MESSAGE APP
 app.get('/login', (req, res) => {
     res.sendFile(__dirname + "/public/Login.html");
 })
 
 app.post('/login', (req, res) => {
-
     let cred = req.body;
-    let success = false;
 
     let db = get_database();
+    let success = false;
     db.users.forEach(user => {
         let hashed_pass = crypto.createHash('sha256').update(cred.pswd + user.secret.pass_salt).digest('hex');
         if (user.client_side.public.username == cred.usrnme && user.secret.password == hashed_pass) {
+            res.send(user.client_side);
             success = true;
-            res.send(JSON.stringify(user.client_side));
-            console.log("LOGGED IN");
         }
     });
-    console.log("FAILED LOG IN");
     if (!success)
         res.send("LOGIN_ERR");
 })
 
 app.post('/chat/api/users', (req, res) => {
     let cred = req.body;
-    console.log(cred);
     if (cred.pswd != cred.c_pswd) {
-        res.send("ERR: Passwords dont match");
+        res.send("ERROR: Passwords dont match");
+        return;
     }
 
     let db = get_database();
     //check if a user with the same username exists!
+    let failure = false;
     db.users.forEach(user => {
         if (user.client_side.public.username == cred.usrnme) {
-            res.send("ERR: Username already exists");
+            res.send("ERROR: Username already exists");
+            failure = true;
         }
     });
+    if (failure)
+        return;
 
     let pass_salt = make_salt(64);
     let salted_pass = cred.pswd + pass_salt;
@@ -106,9 +106,9 @@ app.post('/chat/api/users', (req, res) => {
         }
     }
     db.users.push(new_user);
+    db.chats[0].member_ids.push(id);
     save_database(db);
-    res.send(JSON.stringify(new_user.client_side));
-
+    res.send(new_user.client_side);
 })
 
 app.get('/chat', (req, res) => {
@@ -117,7 +117,7 @@ app.get('/chat', (req, res) => {
 
 function get_database() {
     if (!fs.existsSync("./serverenv/chatdb.json")) {
-        console.log("DB DOES NOT EXIT, CREATING!");
+        console.log("DB DOES NOT EXIST, CREATING!");
         fs.writeFileSync("./serverenv/chatdb.json", JSON.stringify(
             {
                 next_user_id: 1,
@@ -144,8 +144,8 @@ function get_database() {
                 chats: [
                     {
                         chat_id: 0,
-                        name: "example chat",
-                        members: [
+                        chat_name: "example chat",
+                        member_ids: [
                             0
                         ],
                         message_ids: [0]
@@ -171,19 +171,71 @@ function save_database(database) {
 }
 
 
-app.get('/chat/api/messages', (req, res) => {
-    res.send(get_database().messages)
-})
-app.get('/chat/api/users/:userid', (req, res) => {
-    let userid = req.params.userid;
-    res.send(get_database().users[userid].client_side.public);
+app.get('/chat/api/messages/:user_id/:token/:chat_id', (req, res) => {
+    let chat_messages = [];
+    let user_id = req.params.user_id;
+    let token = req.params.token;
+    let chat_id = req.params.chat_id
+
+    let db = get_database();
+    //first check if token is valid
+
+    if (user_id < 0 || chat_id < 0) {
+        res.send("Invalid creds");
+        return;
+    }
+
+    if (db.users[user_id].client_side.private.token == token) {
+        if (db.chats[chat_id].member_ids.includes(parseInt(user_id))) {
+            //if token and user is valid for the chat, find all messages in the chat
+
+            db.chats[chat_id].message_ids.forEach(message_id => {
+                let message = db.messages[message_id];
+                message.username = db.users[message.user_id].client_side.public.username;
+                chat_messages.push(message);
+            });
+            res.send(chat_messages);
+        }
+    } else {
+        res.send("invalid token verification")
+    }
 })
 
-app.post('/chat/api/messages', (req, res) => {
+app.get('/chat/api/users/:user_id', (req, res) => {
+    let user_id = req.params.user_id;
+    res.send(get_database().users[user_id].client_side.public);
+})
+
+app.post('/chat/api/messages/:user_id/:token/:chat_id', (req, res) => {
+
+    let user_id = req.params.user_id;
+    let token = req.params.token;
+    let chat_id = req.params.chat_id;
+
+    //first check if the sender has permission
+    if (user_id < 0 || chat_id < 0) {
+        console.log(1);
+        res.send("Invalid userid or chat id")
+        return;
+    }
+
+    let db = get_database();
+
+    if (db.users[parseInt(user_id)].client_side.private.token != token) {
+        console.log(2)
+        res.send("Invalid token");
+        return;
+    }
+
+    if (!db.chats[parseInt(chat_id)].member_ids.includes(parseInt(user_id))) {
+        console.log(3);
+        res.send("User does not have access to chat");
+        return;
+    }
 
     let body = req.body;
     let date = new Date()
-    let db = get_database();
+
     let message = {
         user_id: body.userid,
         message_content: body.message_content,
@@ -193,8 +245,26 @@ app.post('/chat/api/messages', (req, res) => {
     db.next_message_id++;
 
     db.messages.push(message);
+    db.chats[chat_id].message_ids.push(message.message_id);
     save_database(db);
     res.sendStatus(200)
+})
+
+app.get('/chat/api/chats/:userid/:token', (req, res) => {
+    let user_id = req.params.userid;
+    let token = req.params.token;
+
+    let available_chats = [];
+
+    let db = get_database();
+    db.chats.forEach(chat => {
+        if (chat.member_ids.includes(parseInt(user_id))) {
+            if (db.users[user_id].client_side.private.token == token) {
+                available_chats.push(chat);
+            }
+        }
+    });
+    res.send(available_chats);
 })
 
 
