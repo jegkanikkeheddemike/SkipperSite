@@ -17,7 +17,8 @@ pub async fn handle_command(
         "restart" => restart(args, enviroment_state),
         "reload" => reload(args, enviroment_state).await,
         "host_shutdown" => host_shutdown(args,enviroment_state),
-        "env_panic" => panic!("panic test"), 
+        "env_panic" => panic!("panic test"),
+        "wipe_db" => wipe_db(args,enviroment_state),
         c => printout(format!("    Failed to run command \"{}\"", c)),
     }
 }
@@ -107,5 +108,12 @@ fn env_update(_args: Vec<String>, _enviroment_state: EnviromentState) {
     *control::REPEAT_ON_EXIT.lock().unwrap() = true;
     #[cfg(target_os = "linux")] {
         env_exit(_args, _enviroment_state);
+    }
+}
+
+fn wipe_db(_args: Vec<String>, _enviroment_state: EnviromentState){
+    match std::fs::remove_file("./serverenv/chatdb.json") {
+        Ok(_) => printout("Wiped DB"),
+        Err(err) => printout(format!("Failed to wipe db with err: {}",err)),
     }
 }
