@@ -143,7 +143,7 @@ function get_database() {
                 chats: [
                     {
                         chat_id: 0,
-                        chat_name: "example chat",
+                        chat_name: "global chat",
                         member_ids: [
                             0
                         ],

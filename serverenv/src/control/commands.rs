@@ -1,4 +1,4 @@
-use std::{thread, time::Duration};
+use std::{thread, time::Duration, fs};
 #[cfg(target_os="linux")]
     use tokio::process::Command;
 use crate::control;
@@ -12,14 +12,21 @@ pub async fn handle_command(
     enviroment_state: EnviromentState,
 ) {
     match command_sign.to_lowercase().as_ref() {
-        "env_exit" => env_exit(args, enviroment_state),
         "env_update" => env_update(args, enviroment_state),
         "restart" => restart(args, enviroment_state),
         "reload" => reload(args, enviroment_state).await,
         "host_shutdown" => host_shutdown(args,enviroment_state),
         "env_panic" => panic!("panic test"),
         "wipe_db" => wipe_db(args,enviroment_state),
+        "get_db" => get_db(args,enviroment_state),
         c => printout(format!("    Failed to run command \"{}\"", c)),
+    }
+}
+
+fn get_db(_args: Vec<String>, _enviroment_state: EnviromentState) {
+    match fs::read_to_string("./serverenv/chatdb.json") {
+        Ok(res) => printout(res),
+        Err(_) => printout("Failed to load db"),
     }
 }
 
@@ -106,9 +113,7 @@ fn host_shutdown(_args: Vec<String>, _enviroment_state: EnviromentState){
 
 fn env_update(_args: Vec<String>, _enviroment_state: EnviromentState) {
     *control::REPEAT_ON_EXIT.lock().unwrap() = true;
-    #[cfg(target_os = "linux")] {
         env_exit(_args, _enviroment_state);
-    }
 }
 
 fn wipe_db(_args: Vec<String>, _enviroment_state: EnviromentState){
