@@ -12,31 +12,29 @@
 </head>
 
 <body>
-    <div id="app">
-        <div class="menu_container">
-            <div class="left_menu">
-                <h1>CHAT MENU</h1>
+    <div class="menu_container" id="app">
+        <div class="left_menu">
+            <h1>CHAT MENU</h1>
+        </div>
+        <div class="right_menu">
+            <h1>PROFILE MENU</h1>
+        </div>
+        <div class="middle_menu">
+            <div class="chat_name">
+               <h2> {{chat_name}}</h2>
             </div>
-            <div class="right_menu">
-                <h1>PROFILE MENU</h1>
-            </div>
-            <div class="middle_menu">
-                <div class="chat_name">
-                    <h2>{{chat_name}}</h1>
-                </div>
-                <div class="chat">
-                    <ul v-for="message in messages">
-                        <div class="outer_message">
-                            <div :class="[uid == message.sender?'self_message':'other_message']">
-                                <p>{{ message.message_content }}</p>
-                            </div>
+            <div class="chat">
+                <div v-for="message in messages" class="outer_message">
+                    <div :class="[uid == message.sender?'self_message':'other_message']">
+                        <div class="inner_message">
+                            {{ message.message_content }}
                         </div>
-                    </ul>
+                    </div>
                 </div>
-                <div class="chat_input">
-                    <input type="text" id="chat_input_field">
-                    <button onclick="post_message()">-></button>
-                </div>
+            </div>
+            <div class="chat_input">
+                <input type="text" id="chat_input_field">
+                <button onclick="post_message()">-></button>
             </div>
         </div>
     </div>
