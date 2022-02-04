@@ -79,13 +79,13 @@ app.post('/chat/api/users', (req, res) => {
         }
     });
 
-    let pass_salt = make_salt(255);
+    let pass_salt = make_salt(64);
     let salted_pass = cred.pswd + pass_salt;
 
     let hashed_pass = crypto.createHash('sha256').update(salted_pass).digest('hex');
     console.log("hashed pass: " + hashed_pass);
 
-    let token_salt = make_salt(255);
+    let token_salt = make_salt(64);
     let token = crypto.createHash('sha256').update(cred.usrnme + token_salt).digest('hex');
     let id = db.next_user_id;
     db.next_user_id++;
@@ -93,7 +93,8 @@ app.post('/chat/api/users', (req, res) => {
         client_side: {
             public: {
                 id: id,
-                username: cred.usrnme
+                username: cred.usrnme,
+                friends: []
             },
             private: {
                 token: token
@@ -116,10 +117,47 @@ app.get('/chat', (req, res) => {
 
 function get_database() {
     if (!fs.existsSync("./serverenv/chatdb.json")) {
+        console.log("DB DOES NOT EXIT, CREATING!");
         fs.writeFileSync("./serverenv/chatdb.json", JSON.stringify(
             {
-                users: [],
-                messages: []
+                next_user_id: 1,
+                next_message_id: 1,
+                next_chat_id: 1,
+                users: [
+                    {
+                        client_side: {
+                            public: {
+                                id: 0,
+                                username: "example_user",
+                                friends: []
+                            },
+                            private: {
+                                token: "02937286a97f8450b18ad121e7aafc91a7ded51f4188f4b3f40f704ba67ab316"
+                            }
+                        },
+                        secret: {
+                            password: "8c32bc145e80f78b7a39f16fe838fd4dad36e0865f9a5c284a4049ee27da2cb7",
+                            pass_salt: "qrWtj1yCSyLFTTU6zsOrziHE7KTVrwj4L90s6EFjJxfrBNTeEe2aosid8NoBWig8"
+                        }
+                    }
+                ],
+                chats: [
+                    {
+                        chat_id: 0,
+                        name: "example chat",
+                        members: [
+                            0
+                        ],
+                        message_ids: [0]
+                    }
+                ],
+                messages: [
+                    {
+                        message_id: 0,
+                        message_content: "example_message",
+                        user_id: 0
+                    }
+                ]
             }
         ));
     }
@@ -145,12 +183,15 @@ app.post('/chat/api/messages', (req, res) => {
 
     let body = req.body;
     let date = new Date()
-    let message = {
-        sender: body.userid,
-        message_content: body.message_content,
-        timestamp: date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate() + " " + date.getHours() + ":" + date.getMinutes()
-    }
     let db = get_database();
+    let message = {
+        user_id: body.userid,
+        message_content: body.message_content,
+        timestamp: date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate() + " " + date.getHours() + ":" + date.getMinutes(),
+        message_id: db.next_message_id
+    }
+    db.next_message_id++;
+
     db.messages.push(message);
     save_database(db);
     res.sendStatus(200)
