@@ -12,6 +12,8 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
     extended: true
 }));
 
+var db = get_database();
+
 var visists_this_up = 0;
 var up_start = Date.now();
 
@@ -47,7 +49,6 @@ app.get('/login', (req, res) => {
 app.post('/login', (req, res) => {
     let cred = req.body;
 
-    let db = get_database();
     let success = false;
     db.users.forEach(user => {
         let hashed_pass = crypto.createHash('sha256').update(cred.pswd + user.secret.pass_salt).digest('hex');
@@ -67,7 +68,6 @@ app.post('/chat/api/users', (req, res) => {
         return;
     }
 
-    let db = get_database();
     //check if a user with the same username exists!
     let failure = false;
     db.users.forEach(user => {
@@ -176,7 +176,6 @@ app.get('/chat/api/messages/:user_id/:token/:chat_id', (req, res) => {
     let token = req.params.token;
     let chat_id = req.params.chat_id
 
-    let db = get_database();
     //first check if token is valid
 
     if (user_id < 0 || chat_id < 0) {
@@ -217,7 +216,6 @@ app.post('/chat/api/messages/:user_id/:token/:chat_id', (req, res) => {
         return;
     }
 
-    let db = get_database();
 
     if (db.users[parseInt(user_id)].client_side.private.token != token) {
         res.send("Invalid token");
@@ -252,7 +250,6 @@ app.get('/chat/api/chats/:userid/:token', (req, res) => {
 
     let available_chats = [];
 
-    let db = get_database();
     db.chats.forEach(chat => {
         if (chat.member_ids.includes(parseInt(user_id))) {
             if (db.users[user_id].client_side.private.token == token) {
