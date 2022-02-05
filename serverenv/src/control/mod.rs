@@ -33,7 +33,7 @@ pub fn spawn_server() -> tokio::process::Child {
     #[cfg(target_os = "windows")]
     {
         child = Command::new("C:\\Program Files\\nodejs\\node.exe")
-            .arg("serverenv\\server\\server.js")
+            .arg("serverenv\\server\\server.ts")
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .spawn()

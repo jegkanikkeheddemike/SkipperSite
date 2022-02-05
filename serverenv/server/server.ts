@@ -1,23 +1,24 @@
 const port = 3000;
 const express = require('express')
-const app = express()
+const e_app = express()
 const bodyParser = require('body-parser')
-const crypto = require("crypto")
-const fs = require("fs")
+const crypt = require("crypto")
+const fs = require("fs");
 const os = require('os')
+const db_helpers = require('./db.ts')
 
-app.use(express.static('serverenv/server/public'))
-app.use(express.json());
-app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+e_app.use(express.static('serverenv/server/public'))
+e_app.use(express.json());
+e_app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
     extended: true
 }));
 
-var db = get_database();
+var db = db_helpers.get_database();
 
 var visists_this_up = 0;
 var up_start = Date.now();
 
-app.get('/', (req, res) => {
+e_app.get('/', (req, res) => {
     const buffer = fs.readFileSync("serverenv/server/public/Homepage.html");
     let fileContent = buffer.toString();
     fileContent = fileContent.replace("{hostname}", os.hostname());
@@ -32,7 +33,7 @@ app.get('/', (req, res) => {
     res.send(fileContent);
 })
 
-app.listen(port, () => {
+e_app.listen(port, () => {
     console.log(`    Server listening at on ${port}`)
 })
 
@@ -42,16 +43,16 @@ function get_now() {
 }
 
 //DATABASE AND MESSAGE APP
-app.get('/login', (req, res) => {
+e_app.get('/login', (req, res) => {
     res.sendFile(__dirname + "/public/Login.html");
 })
 
-app.post('/login', (req, res) => {
+e_app.post('/login', (req, res) => {
     let cred = req.body;
 
     let success = false;
     db.users.forEach(user => {
-        let hashed_pass = crypto.createHash('sha256').update(cred.pswd + user.secret.pass_salt).digest('hex');
+        let hashed_pass = crypt.createHash('sha256').update(cred.pswd + user.secret.pass_salt).digest('hex');
         if (user.client_side.public.username == cred.usrnme && user.secret.password == hashed_pass) {
             res.send(user.client_side);
             success = true;
@@ -61,7 +62,7 @@ app.post('/login', (req, res) => {
         res.send("LOGIN_ERR");
 })
 
-app.post('/chat/api/users', (req, res) => {
+e_app.post('/chat/api/users', (req, res) => {
     let cred = req.body;
     if (cred.pswd != cred.c_pswd) {
         res.send("ERROR: Passwords dont match");
@@ -82,10 +83,10 @@ app.post('/chat/api/users', (req, res) => {
     let pass_salt = make_salt(64);
     let salted_pass = cred.pswd + pass_salt;
 
-    let hashed_pass = crypto.createHash('sha256').update(salted_pass).digest('hex');
+    let hashed_pass = crypt.createHash('sha256').update(salted_pass).digest('hex');
 
     let token_salt = make_salt(64);
-    let token = crypto.createHash('sha256').update(cred.usrnme + token_salt).digest('hex');
+    let token = crypt.createHash('sha256').update(cred.usrnme + token_salt).digest('hex');
     let id = db.next_user_id;
     db.next_user_id++;
     let new_user = {
@@ -106,71 +107,18 @@ app.post('/chat/api/users', (req, res) => {
     }
     db.users.push(new_user);
     db.chats[0].member_ids.push(id);
-    save_database(db);
+    db_helpers.save_database(db);
     res.send(new_user.client_side);
 })
 
-app.get('/chat', (req, res) => {
+e_app.get('/chat', (req, res) => {
     res.sendFile(__dirname + "/public/Chat.html");
 })
 
-function get_database() {
-    if (!fs.existsSync("./serverenv/chatdb.json")) {
-        console.log("DB DOES NOT EXIST, CREATING!");
-        fs.writeFileSync("./serverenv/chatdb.json", JSON.stringify(
-            {
-                next_user_id: 1,
-                next_message_id: 1,
-                next_chat_id: 1,
-                users: [
-                    {
-                        client_side: {
-                            public: {
-                                id: 0,
-                                username: "example_user",
-                                friends: []
-                            },
-                            private: {
-                                token: "02937286a97f8450b18ad121e7aafc91a7ded51f4188f4b3f40f704ba67ab316"
-                            }
-                        },
-                        secret: {
-                            password: "8c32bc145e80f78b7a39f16fe838fd4dad36e0865f9a5c284a4049ee27da2cb7",
-                            pass_salt: "qrWtj1yCSyLFTTU6zsOrziHE7KTVrwj4L90s6EFjJxfrBNTeEe2aosid8NoBWig8"
-                        }
-                    }
-                ],
-                chats: [
-                    {
-                        chat_id: 0,
-                        chat_name: "global chat",
-                        member_ids: [
-                            0
-                        ],
-                        message_ids: [0]
-                    }
-                ],
-                messages: [
-                    {
-                        message_id: 0,
-                        message_content: "example_message",
-                        user_id: 0
-                    }
-                ]
-            }
-        ));
-    }
-    return JSON.parse(fs.readFileSync("./serverenv/chatdb.json").toString());
-}
-
-function save_database(database) {
-    if (database != null) {
-        fs.writeFileSync("./serverenv/chatdb.json", JSON.stringify(database));
-    }
-}
 
 
-app.get('/chat/api/messages/:user_id/:token/:chat_id', (req, res) => {
+
+e_app.get('/chat/api/messages/:user_id/:token/:chat_id', (req, res) => {
     let chat_messages = [];
     let user_id = req.params.user_id;
     let token = req.params.token;
@@ -199,12 +147,12 @@ app.get('/chat/api/messages/:user_id/:token/:chat_id', (req, res) => {
     }
 })
 
-app.get('/chat/api/users/:user_id', (req, res) => {
+e_app.get('/chat/api/users/:user_id', (req, res) => {
     let user_id = req.params.user_id;
-    res.send(get_database().users[user_id].client_side.public);
+    res.send(db.users[user_id].client_side.public);
 })
 
-app.post('/chat/api/messages/:user_id/:token/:chat_id', (req, res) => {
+e_app.post('/chat/api/messages/:user_id/:token/:chat_id', (req, res) => {
 
     let user_id = req.params.user_id;
     let token = req.params.token;
@@ -240,11 +188,11 @@ app.post('/chat/api/messages/:user_id/:token/:chat_id', (req, res) => {
 
     db.messages.push(message);
     db.chats[chat_id].message_ids.push(message.message_id);
-    save_database(db);
+    db_helpers.save_database(db);
     res.sendStatus(200)
 })
 
-app.get('/chat/api/chats/:userid/:token', (req, res) => {
+e_app.get('/chat/api/chats/:userid/:token', (req, res) => {
     let user_id = req.params.userid;
     let token = req.params.token;
 
