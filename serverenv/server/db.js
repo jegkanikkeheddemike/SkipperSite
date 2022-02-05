@@ -1,5 +1,5 @@
 const fs = require("fs");
-const crypto = require("node:crypto");
+const crypto = require("crypto");
 
 var data = {};
 
