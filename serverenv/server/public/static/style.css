@@ -11,6 +11,41 @@ h1 {
     font-size: 400%;
 }
 
+.left_menu h1 {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.right_menu h1 {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.left_menu_header {
+    height: 60px;
+}
+
+.left_menu_header h1 {
+    float: left;
+    height: 60px;
+}
+
+.left_menu_header button {
+    background-color: darkslateblue;
+    margin-left: 8px;
+    padding: 0;
+    border-width: 0;
+    border-radius: 10px;
+    height: 40px;
+    width: 40px;
+    float: left;
+    margin-top: 20px;
+}
+
+.left_menu_header button:hover {
+    background-color: slateblue;
+}
+
 h2 {
     color: seashell;
     font-size: 200%;
@@ -173,4 +208,35 @@ h2 {
     margin-left: 15px;
     text-align: left;
     color: darkred;
+}
+
+.chat {
+    background-color: darkslateblue;
+    border-width: 0;
+    border-radius: 10px;
+    text-align: left;
+    width: calc(100% - 20px);
+    margin-left: 10px;
+    height: 40px;
+}
+
+.chat:hover {
+    background-color: slateblue;
+}
+
+.chats {
+    padding: 0px;
+}
+.chat_creator {
+    margin-left: 10px;
+}
+
+.chat_creator form input {
+    border-width: 0;
+    border-radius: 3px;
+    background-color: darkslateblue;
+}
+
+.chat_creator form input:hover {
+    background-color: slateblue;
 }

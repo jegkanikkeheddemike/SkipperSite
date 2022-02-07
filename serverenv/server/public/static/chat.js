@@ -1,38 +1,39 @@
 var chats_url = window.location.href + "/api/chats/" + localStorage.getItem("usr_id") + "/" + localStorage.getItem("usr_token");
-
+$.ajax.async = false;
 var app = new Vue({
     el: '#app',
     data: {
         chats: [],
         chat_id: -1,
         uid: localStorage.getItem("usr_id"),
-        messages: []
-    },
-    methods: {
-        get_user: async function (user_id) {
-            let username = "";
-            let target_url = location.href + "/api/users/" + user_id;
-
-
-            $.getJSON(target_url, (data) => {
-                username = data.username;
-            });
-        }
+        messages: [],
+        creating_new_chat: true, //will be set false 
+        members_in_chat: [],
     }
 });
 
 function update_chats() {
     $.getJSON(chats_url, (data) => {
         app.chats = data;
-        if (data.length != 0) {
-            app.chat_id = 0;
-        }
+        app.chat_id = 0;
         update_messages();
+        update_chat_members();
     });
-
 }
 update_chats();
-console.log(app.chats);
+
+function update_chat_members() {
+    app.members_in_chat = [];
+    app.chats[app.chat_id].member_ids.forEach(member_id => {
+        $.getJSON("/chat/api/users/" + member_id, (data) => {
+            let member = {
+                member_id: member_id,
+                username: data.username
+            }
+            app.members_in_chat.push(member);
+        });
+    });
+}
 
 async function update_messages() {
     let messages_url = window.location.href + "/api/messages/" + app.uid + "/" + localStorage.getItem("usr_token") + "/" + app.chat_id;
@@ -41,7 +42,7 @@ async function update_messages() {
         if (app.messages.length != data.length) {
             app.messages = data;
             Vue.nextTick(() => {
-                chat.scrollTo(0,chat.scrollHeight);
+                chat.scrollTo(0, chat.scrollHeight);
             });
         }
 
@@ -80,4 +81,39 @@ function post_message() {
     chat_input_field.value = "";
     update_messages();
     chat.scrollTo(0, chat.scrollHeight);
+}
+
+function switch_create_chat() {
+    app.creating_new_chat = !app.creating_new_chat;
+
+    if (app.creating_new_chat) {
+        Vue.nextTick(() => {
+            chat_form.action = "chat/api/chats/" + app.uid + "/" + localStorage.getItem("usr_token");
+            console.log("Helo " + chat_form.action);
+
+            //Bind ajax_forms to the form
+            //MUST be loaded after the DOM
+            $("#chat_form").ajaxForm(function (response) {
+                new_chat_res(response);
+            });
+        });
+    }
+}
+
+app.creating_new_chat = false;
+
+function new_chat_res(res) {
+    if (res == "success") {
+        update_chats();
+    }
+}
+
+function change_chat(chat) {
+    app.chats.forEach(app_chat => {
+        if (app_chat.id == chat.attributes.chat_id.value) {
+            app.chat_id = app_chat.chat_id;
+            update_messages();
+            update_chat_members();
+        }
+    });
 }

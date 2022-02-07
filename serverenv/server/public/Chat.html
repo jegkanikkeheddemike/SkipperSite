@@ -15,24 +15,42 @@
     <title>Chat</title>
     <link rel="stylesheet" href="static/style.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://malsup.github.io/jquery.form.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
     <script src="static/shared.js"></script>
-
 </head>
 
 <body>
     <div class="menu_container" id="app">
         <div class="left_menu">
-            <h1>Chats</h1>
+            <div class="left_menu_header">
+                <h1>Chats</h1>
+                <button onclick="switch_create_chat()">+</button>
+                <button onclick="log_out()">Log out</button>
+                <br>
+            </div>
+            <div v-if="creating_new_chat" class="chat_creator">
+
+                <!-- the form action will be overwritten when scripts load-->
+                <form action="chat/api/chats" method="post" id="chat_form">
+                    <label>New chat name</label><br>
+                    <input type="text" name="chat_name">
+                    <input type="submit" value="Create">
+                </form>
+            </div>
             <ul v-for="chat in chats" class="chats">
-                <button class="chat">
+                <button class="chat" onclick="change_chat(this)" :chat_id = "chat.chat_id">
                     {{chat.chat_name}}
                 </button>
             </ul>
         </div>
         <div class="right_menu">
-            <h1>PROFILE MENU</h1>
-            <button onclick="log_out()">Log out</button>
+            <h1>Members</h1>
+            <div v-if="chats.length != 0" class="chat_members">
+                <div v-for="member in members_in_chat">
+                    {{member.username}}
+                </div>
+            </div>
         </div>
         <div class="middle_menu">
             <div class="chat_name">

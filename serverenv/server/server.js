@@ -169,3 +169,21 @@ e_app.get('/chat/api/chats/:userid/:token', (req, res) => {
     res.send(available_chats);
 })
 
+e_app.post('/chat/api/chats/:user_id/:token',(req,res) => {
+    console.log(req.params);
+    console.log(req.body);
+
+    let user_id = req.params.user_id;
+    let token = req.params.token;
+    let chat_name = req.body.chat_name;
+
+    if (db.data.users[user_id].client_side.private.token != token) {
+        res.send("Validication error creating form.")
+        return;
+    }
+
+    let chat_id = db.new_chat(chat_name);
+    console.log("created chat id " + chat_id);
+    db.add_user_to_chat(chat_id,user_id);
+    res.send("Success");
+})
