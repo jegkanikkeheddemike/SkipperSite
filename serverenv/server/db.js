@@ -22,7 +22,8 @@ module.exports = {
     data: data,
     new_user: new_user,
     new_chat: new_chat,
-    new_message: new_message
+    new_message: new_message,
+    add_user_to_chat: add_user_to_chat
 }
 
 function save_database() {
@@ -89,6 +90,11 @@ function new_chat(chat_name) {
     data.chats.push(chat);
     save_database();
     return chat.chat_id;
+}
+
+function add_user_to_chat(chat_id,user_id) {
+    data.chats[chat_id].member_ids.push(parseInt(user_id));
+    save_database();
 }
 
 function new_db() {

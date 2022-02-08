@@ -77,8 +77,8 @@ e_app.post('/chat/api/users', (req, res) => {
     });
     if (failure)
         return;
-    
-    let id = db.new_user(cred.usrnme,cred.pswd);
+
+    let id = db.new_user(cred.usrnme, cred.pswd);
     let new_user = db.data.users[id];
     res.send(new_user.client_side);
 })
@@ -149,23 +149,83 @@ e_app.post('/chat/api/messages/:user_id/:token/:chat_id', (req, res) => {
 
     let body = req.body;
 
-    db.new_message(body.message_content,user_id, chat_id);
+    db.new_message(body.message_content, user_id, chat_id);
     res.sendStatus(200)
 })
 
 e_app.get('/chat/api/chats/:userid/:token', (req, res) => {
-    let user_id = req.params.userid;
-    let token = req.params.token;
 
+    console.log(req.params);
+
+    let user_id = parseInt(req.params.userid);
+    let token = req.params.token;
     let available_chats = [];
 
+    if (db.data.users[user_id].client_side.private.token != token) {
+        res.send("Token not valid");
+        return;
+    }
+
+
     db.data.chats.forEach(chat => {
-        if (chat.member_ids.includes(parseInt(user_id))) {
-            if (db.data.users[user_id].client_side.private.token == token) {
-                available_chats.push(chat);
-            }
+        if (chat.member_ids.includes(user_id)) {
+            available_chats.push(chat);
         }
     });
+    console.log(available_chats);
     res.send(available_chats);
 })
 
+e_app.post('/chat/api/chats/:user_id/:token', (req, res) => {
+    console.log(req.params);
+    console.log(req.body);
+
+    let user_id = req.params.user_id;
+    let token = req.params.token;
+    let chat_name = req.body.chat_name;
+
+    if (db.data.users[user_id].client_side.private.token != token) {
+        res.send("Validication error creating form.")
+        return;
+    }
+
+    let chat_id = db.new_chat(chat_name);
+    console.log("created chat id " + chat_id);
+    db.add_user_to_chat(chat_id, user_id);
+    res.send("Success");
+})
+
+
+e_app.post("/chat/api/chats/:chat_id/members/:user_id/:user_token", (req,res) => {
+    let chat_id = req.params.chat_id;
+    let user_id = parseInt(req.params.user_id);
+    let token = req.params.user_token;
+
+    //First check if token is valid;
+    if (db.data.users[user_id].client_side.private.token != token) {
+        res.send("invalid token");
+        return;
+    }
+
+    //then check if user is in the chat
+    if (!db.data.chats[chat_id].member_ids.includes(parseInt(user_id))) {
+        res.send("User is not in chat");
+        return;
+    }
+
+    let invite_user_username = req.body.username;
+    db.data.users.forEach(user => {
+
+        //find use with the username
+        if (user.client_side.public.username == invite_user_username) {
+
+            //check if the user already is in the chat
+            if (db.data.chats[chat_id].member_ids.includes(user.client_side.public.id)){
+                res.send("User already in chat");
+                return;
+            }
+            db.data.chats[chat_id].member_ids.push(user.client_side.public.id);
+            res.send("User added to chat");
+        }
+    });
+});
