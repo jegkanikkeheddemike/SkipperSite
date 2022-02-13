@@ -116,7 +116,8 @@ fn env_update(_args: Vec<String>, _enviroment_state: EnviromentState) {
         env_exit(_args, _enviroment_state);
 }
 
-fn wipe_db(_args: Vec<String>, _enviroment_state: EnviromentState){
+fn wipe_db(args: Vec<String>, enviroment_state: EnviromentState){
+    restart(args,enviroment_state);
     match std::fs::remove_file("./serverenv/chatdb.json") {
         Ok(_) => printout("Wiped DB"),
         Err(err) => printout(format!("Failed to wipe db with err: {}",err)),
