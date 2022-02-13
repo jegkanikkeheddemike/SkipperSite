@@ -12,20 +12,24 @@ var app = new Vue({
     },
     methods: {
         get_chat: chat_id => {
+
             let chat;
 
-            app.chats.forEach(this_chat => {
-                if (this_chat.chat_id == chat_id) {
-                    chat = this_chat;
-                }
-            });
-            return chat;
+            if (app) {
+                app.chats.forEach(this_chat => {
+                    if (this_chat.chat_id == chat_id) {
+                        chat = this_chat;
+                    }
+                });
+                return chat;
+            }
+            return "Loading";
+
         }
     }
 });
 
 function update_chats() {
-    console.log(chats_url)
     $.getJSON(chats_url, (data) => {
         app.chats = data;
         app.chat_id = 0;
@@ -37,8 +41,6 @@ update_chats();
 
 function update_chat_members() {
     app.members_in_chat = [];
-
-
 
     app.get_chat(app.chat_id).member_ids.forEach(member_id => {
         $.getJSON("/chat/api/users/" + member_id, (data) => {
@@ -55,12 +57,18 @@ async function update_messages() {
     let messages_url = window.location.href + "/api/messages/" + app.uid + "/" + localStorage.getItem("usr_token") + "/" + app.chat_id;
     $.getJSON(messages_url, (data) => {
 
-        if (app.messages.length != data.length) {
-            app.messages = data;
-            Vue.nextTick(() => {
-                chat.scrollTo(0, chat.scrollHeight);
-            });
+        if (typeof (data) == typeof ("")) {
+            console.log("ERR: (getting messages): " + data);
+            return;
         }
+
+
+        app.messages = data;
+
+        Vue.nextTick(() => {
+            chat.scrollTo(0, chat.scrollHeight);
+        });
+
 
     });
 }
@@ -82,8 +90,6 @@ function post_message() {
         userid: app.uid,
         message_content: chat_input_field.value
     });
-
-    console.log(formdata);
 
     $.ajax(
         {
