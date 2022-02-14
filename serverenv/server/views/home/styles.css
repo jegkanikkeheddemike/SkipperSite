@@ -1,0 +1,61 @@
+body {
+    background-color: rgb(22, 22, 22);
+}
+
+h1 {
+    text-align: center;
+    color: aliceblue;
+    font-size: 4em;
+}
+
+h2 {
+    text-align: center;
+    color: aliceblue;
+    font-size: 3em;
+}
+
+h3 {
+    text-align: center;
+    color: aliceblue;
+    font-size: 1.5em;
+}
+
+h4 {
+    text-align: center;
+    color: aliceblue;
+    font-size: 1.2em;
+}
+
+.projekter {
+    display: flex;
+    flex-wrap: wrap;
+    width: 80%;
+    align-items: center;
+    justify-content: center;
+    grid-column: span;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.projekt {
+    margin: 3em;
+    padding: 0;
+    text-align: center;
+    overflow-x: visible;
+    width: 25em;
+}
+
+.projekt h2 {
+    margin: 0;
+    padding: 0;
+}
+
+.projekt h4 {
+    margin: 0;
+    padding: 0;
+}
+
+.projekt img {
+    height: 25em;
+    background-color: aqua;
+}

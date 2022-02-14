@@ -32,8 +32,9 @@ pub fn spawn_server() -> tokio::process::Child {
     let mut child;
     #[cfg(target_os = "windows")]
     {
-        child = Command::new("C:\\Program Files\\nodejs\\node.exe")
-            .arg("serverenv\\server\\server.js")
+        child = Command::new("C:\\Program Files\\nodejs\\npx.exe")
+            .arg("ts-node")
+            .arg("serverenv\\server\\server.ts")
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .spawn()
@@ -42,8 +43,9 @@ pub fn spawn_server() -> tokio::process::Child {
 
     #[cfg(target_os = "linux")]
     {
-        child = Command::new("node")
-            .arg("serverenv/server/server.js")
+        child = Command::new("npx")
+            .arg("ts-node")
+            .arg("serverenv/server/server.ts")
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .spawn()
