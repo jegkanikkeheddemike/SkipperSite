@@ -21,11 +21,11 @@
                 <th>
                     <div class="login">
                         <h1>Login</h1>
-                        <form id="login_form" class="login_form" action="login" method="post">
+                        <form id="login_form" class="login_form" action="" method="post">
                             <label>Username</label><br>
-                            <input type="text" name="usrnme" id="login_usrnme"><br>
+                            <input type="text" name="username"><br>
                             <label>Password</label><br>
-                            <input type="password" name="pswd" id="login_pswd"><br>
+                            <input type="password" name="password"><br>
                             <input type="submit" value="Login">
                         </form>
                         <h3 v-if="failed_login" class="login_err">
@@ -36,13 +36,13 @@
                 <th>
                     <div class="signup">
                         <h1>Sign up</h1>
-                        <form id="signup_form" class="login_form" action="/chat/api/users" method="post">
+                        <form id="signup_form" class="login_form" action="signup" method="post">
                             <label>Username</label><br>
-                            <input type="text" name="usrnme" id="sign_usrnme"><br>
+                            <input type="text" name="username"><br>
                             <label>Password</label><br>
-                            <input type="password" name="pswd" id="sign_pswd"><br>
+                            <input type="password" name="password"><br>
                             <label>Confirm password</label><br>
-                            <input type="password" name="c_pswd" id="sign_c_pswd"><br>
+                            <input type="password" name="c_password"><br>
                             <input type="submit" value="Sign up">
                         </form>
                         <h3 v-if="failed_signup" class="login_err">

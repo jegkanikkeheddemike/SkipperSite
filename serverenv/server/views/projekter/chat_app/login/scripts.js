@@ -13,7 +13,7 @@ var app = new Vue({
 
 //Bind ajax_forms to the form
 //MUST be loaded after the DOM
-$("#login_form").ajaxForm(function (response) {
+$("#login_form").ajaxForm(response => {
     login(response);
 });
 //Bind ajax_forms to the form
@@ -23,29 +23,24 @@ $("#signup_form").ajaxForm(function (response) {
 });
 
 function signup(res) {
-    console.log(res);
-    if (typeof (res) == typeof ("")) {
-        app.failed_signup = true;
-        app.signup_error = res.substring(7);
-    } else {
+    if (res.success) {
         login(res);
+    } else {
+        app.signup_error = res.data;
+        app.failed_signup = true;
     }
 }
 
 
 function login(res) {
-    console.log(res);
-    if (typeof (res) == typeof ("")) {
-        app.failed_login = true;
-    } else {
+    if (res.success) {
 
-        let user = res;
-
-        console.log(user);
-
+        let user = res.data;
         window.localStorage.setItem("usr_token", user.private.token);
         window.localStorage.setItem("usr_name", user.public.username);
         window.localStorage.setItem("usr_id", user.public.id);
-        window.location.pathname = "/chat";
+        window.location.pathname = "/projekter/chat_app/chat";
+    } else {
+        app.failed_login = true;
     }
 }

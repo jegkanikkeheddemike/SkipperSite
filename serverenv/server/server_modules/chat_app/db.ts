@@ -1,6 +1,6 @@
 import * as db_types from "./db_types";
-
 import fs from "fs"
+import * as crypto from "crypto";
 
 var data: db_types.Database;
 
@@ -11,7 +11,7 @@ function db_init() {
         console.log("Loaded BD");
     } else {
         console.log("Creating db");
-        data = new_database();
+        new_database();
         save_db();
     }
 }
@@ -35,26 +35,45 @@ function create_message(text: string, user_id: number, chat_id: number): number 
     return message.id;
 }
 
-function create_user() {
-    let user:db_types.User = {
+function create_chat(chat_name: string, creator_id: number): number {
+    let chat: db_types.Chat = {
+        chat_name: chat_name,
+        id: data.next_chat_id,
+        member_ids: [creator_id],
+        message_ids: []
+    }
+    data.next_chat_id = data.next_chat_id + 1;
+    data.chats.push(chat);
+    save_db();
+    return chat.id;
+}
+
+function create_user(username: string, password: string): number {
+    let salt = random_salt();
+    let user: db_types.User = {
         client: {
             public: {
-                username: undefined,
-                id: 0,
+                username: username,
+                id: data.next_user_id,
                 friends: []
             },
             private: {
-                token: undefined
+                token: "RANDOMTOKEN"
             }
         },
         secret: {
-            password: undefined,
-            salt: undefined
+            password: hash(password, salt),
+            salt: salt,
         }
     }
+    data.next_user_id = data.next_user_id + 1;
+    data.users.push(user);
+    data.chats[0].member_ids.push(user.client.public.id);
+    save_db();
+    return user.client.public.id;
 }
 
-function new_database(): db_types.Database {
+function new_database() {
     let db: db_types.Database = {
         messages: [],
         chats: [],
@@ -63,8 +82,28 @@ function new_database(): db_types.Database {
         next_message_id: 0,
         next_chat_id: 0
     }
-    return db;
+    data = db;
+    create_chat("Global chat", 0);
+    create_user("Admin","123");
 }
 
+function hash(password: string, salt: string) {
+    let ps = password + "" + salt;
 
-export { data, db_init, create_message };
+    return crypto.createHash('sha256').update(ps).digest('hex');
+}
+
+function random_salt(): string {
+
+    let result = '';
+    let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let charactersLength = characters.length;
+    for (let i = 0; i < 64; i++) {
+        result += characters.charAt(Math.floor(Math.random() *
+            charactersLength));
+    }
+    return result;
+
+}
+
+export { data, db_init, create_message, hash, create_chat, create_user };

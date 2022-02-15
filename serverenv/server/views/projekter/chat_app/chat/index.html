@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <link rel="stylesheet" href="/global_styles.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://malsup.github.io/jquery.form.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="scripts.js"></script>
+    <script src="../scripts.js"></script>
+</head>
+
+<body>
+    <div class="menu_container" id="app">
+        <div class="left_menu">
+            <div class="left_menu_header">
+                <h1>Chats</h1>
+                <button onclick="switch_create_chat()">+</button>
+                <button onclick="log_out()">Log out</button>
+                <br>
+            </div>
+            <div v-if="creating_new_chat" class="chat_creator">
+
+                <!-- the form action will be overwritten when scripts load-->
+                <form action="chat/api/chats" method="post" id="chat_form" class="std_form">
+                    <label>New chat name</label><br>
+                    <input type="text" name="chat_name">
+                    <input type="submit" value="Create">
+                </form>
+            </div>
+            <div class="chats">
+                <button v-for="chat in chats" class="chat" onclick="change_chat(this)" :chat_id="chat.chat_id">
+                    {{chat.chat_name}}
+                </button>
+            </div>
+        </div>
+        <div class="right_menu">
+            <div class="right_menu_header">
+                <h1>Members</h1>
+            </div>
+            <div class="right_menu_options">
+                <button onclick="set_member_options_mode('invite')">Invite user</button>
+            </div>
+            <div v-if="member_options_mode=='invite'" class="member_invite">
+                <form class="std_form" action="chat/api/chats/members" id="member_invite_form" method="post">
+                    <label>Username</label><br>
+                    <input type="text" name="username">
+                    <input type="submit" value="Invite">
+                </form>
+            </div>
+            <div v-if="chats.length != 0" class="chat_members">
+                <button v-for="member in members_in_chat" class="member">
+                    {{member.username}}
+                </button>
+            </div>
+        </div>
+        <div class="middle_menu">
+            <div class="chat_name">
+                <h2> {{get_chat(chat_id).chat_name ? get_chat(chat_id).chat_name : 'No chats found'}}</h2>
+            </div>
+            <div class="chat_board" id="chat">
+                <div v-for="message in messages">
+                    <div :class="uid == message.user_id ? 'self_message':'other_message'">
+                        <p class="username">{{message.username}}</p>
+                        <div class="inner_message">
+                            {{ message.message_content }}
+                        </div>
+                        <p class="timestamp">{{message.timestamp}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="chat_input">
+                <form onsubmit="post_message(); return false;">
+                    <input type="text" id="chat_input_field">
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="scripts.js"></script>
+</body>
+
+</html>

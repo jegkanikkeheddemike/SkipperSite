@@ -1,5 +1,5 @@
 type Message = {
-    text: String;
+    text: string;
     id: number;
     user_id: number;
 }
@@ -7,22 +7,22 @@ type Message = {
 type User = {
     client: {
         public: {
-            username: String;
+            username: string;
             id: number;
             friends: number[];
         };
         private: {
-            token: String;
+            token: string;
         };
     };
     secret: {
-        password: String;
-        salt: String;
+        password: string;
+        salt: string;
     }
 }
 
 type Chat = {
-    chat_name: String;
+    chat_name: string;
     id: number;
     member_ids: number[];
     message_ids: number[];
