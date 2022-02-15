@@ -1,0 +1,44 @@
+h1 {
+    font-size: 4em;
+}
+.login_container {
+    position: relative;
+    top: calc(50vh - 270px);
+    left: calc(50% - 440px);
+    margin: 0;
+    width: 880px;
+}
+
+.login {
+    width: 400px;
+    margin: 20px;
+    height: 500px;
+    background-color: rgb(60, 60, 60);
+}
+
+.login_form {
+    text-align: left;
+    font-size: 35px;
+    margin-left: 15px;
+}
+
+.login_form input {
+    background-color: #4A4E69;
+    border-width: 0;
+    height: 30px;
+    font-size: 24px;
+    border-radius: 5px;
+}
+
+.signup {
+    width: 400px;
+    margin: 20px;
+    height: 500px;
+    background-color: rgb(60, 60, 60);
+}
+
+.login_err {
+    margin-left: 15px;
+    text-align: left;
+    color: darkred;
+}

@@ -1,28 +1,22 @@
-body {
-    background-color: rgb(22, 22, 22);
-}
+
 
 h1 {
     text-align: center;
-    color: aliceblue;
     font-size: 4em;
 }
 
 h2 {
     text-align: center;
-    color: aliceblue;
     font-size: 3em;
 }
 
 h3 {
     text-align: center;
-    color: aliceblue;
     font-size: 1.5em;
 }
 
 h4 {
     text-align: center;
-    color: aliceblue;
     font-size: 1.2em;
 }
 
@@ -57,5 +51,5 @@ h4 {
 
 .projekt img {
     height: 25em;
-    background-color: aqua;
+    background-color: #C9ADA7;
 }

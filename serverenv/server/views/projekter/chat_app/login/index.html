@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://malsup.github.io/jquery.form.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="../scripts.js"></script>
+    <link rel="stylesheet" href="/global_styles.css">
+    <link rel="stylesheet" href="styles.css">
+    <title>Login</title>
+</head>
+
+<body>
+    <div id="app" class="login_container">
+        <table>
+            <tr>
+                <th>
+                    <div class="login">
+                        <h1>Login</h1>
+                        <form id="login_form" class="login_form" action="login" method="post">
+                            <label>Username</label><br>
+                            <input type="text" name="usrnme" id="login_usrnme"><br>
+                            <label>Password</label><br>
+                            <input type="password" name="pswd" id="login_pswd"><br>
+                            <input type="submit" value="Login">
+                        </form>
+                        <h3 v-if="failed_login" class="login_err">
+                            Wrong username or password :(
+                        </h3>
+                    </div>
+                </th>
+                <th>
+                    <div class="signup">
+                        <h1>Sign up</h1>
+                        <form id="signup_form" class="login_form" action="/chat/api/users" method="post">
+                            <label>Username</label><br>
+                            <input type="text" name="usrnme" id="sign_usrnme"><br>
+                            <label>Password</label><br>
+                            <input type="password" name="pswd" id="sign_pswd"><br>
+                            <label>Confirm password</label><br>
+                            <input type="password" name="c_pswd" id="sign_c_pswd"><br>
+                            <input type="submit" value="Sign up">
+                        </form>
+                        <h3 v-if="failed_signup" class="login_err">
+                            {{signup_error}}
+                        </h3>
+                    </div>
+                </th>
+            </tr>
+        </table>
+    </div>
+    <script src="scripts.js"></script>
+</body>
+
+</html>

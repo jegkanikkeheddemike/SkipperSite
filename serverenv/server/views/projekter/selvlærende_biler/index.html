@@ -1,12 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title></title>
+
+    <title>Selvlærende biler</title>
+
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <link rel="stylesheet" type="text/css" href="/global_styles.css">
+
+    <script src="libraries/p5.min.js"></script>
+    <script src="libraries/p5.sound.min.js"></script>
+    <script src="app/printing.js"></script>
+    <script src="app/Bane.js"></script>
+    <script src="app/BaneDele.js"></script>
+    <script src="app/Bil.js"></script>
+    <script src="app/GenAlgorithm.js"></script>
 </head>
+
 <body>
-    
+    <script src="app/sketch.js"></script>
+    <div id="left_menu" class="left_menu">
+        <div class="Logger">
+            <h2 style="text-align: center;">Console</h5>
+                <ul id="Console">
+                </ul>
+        </div>
+        <div class="Options">
+            <table>
+                <tr>
+                    <td>Generation Size</td>
+                    <td>Mutation Factor</td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="text" style="height: 25%; width: 97%" id="getGenSize"></input>
+                    </td>
+                    <td>
+                        <input type="text" style="height: 25%; width: 97%;" id="getMutationRate"></input>
+                    </td>
+                </tr>
+                <script>
+                    document.getElementById("getGenSize").value = 20;
+                </script>
+                <script>
+                    document.getElementById("getMutationRate").value = 0.2;
+                </script>
+            </table>
+            <button type="button" style="width: 100%; height: 50%;" onclick="setup();">Reset sim</button>
+        </div>
+    </div>
 </body>
+
+
 </html>

@@ -1,0 +1,40 @@
+.Logger {
+    margin: 0;
+    padding: 0;
+    width: 300px;
+    background-color: #4A4E69;
+    overflow: scroll;
+    height: calc(100vh - 100px);
+    position: fixed;
+}
+
+.Logger ul {
+    list-style-type: none;
+}
+
+.Options {
+    width: 300px;
+    position: absolute;
+    bottom: 0;
+    height: 100px;
+}
+
+li {
+    color: #f2e9e4;
+}
+
+td {
+    color: #f2e9e4;
+}
+
+button {
+    border-radius: 5px;
+    background-color: #C9ADA7;
+    border-width: 0;
+}
+
+input {
+    background-color: #C9ADA7;
+    border-width: 0;
+    border-radius: 5px;
+}
