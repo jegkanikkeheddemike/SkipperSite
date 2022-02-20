@@ -28,7 +28,10 @@ fn get_db(_args: Vec<String>, _enviroment_state: EnviromentState) {
         Ok(res) => {
             let res = res.replace("{", "{\n");
             let res = res.replace("}", "\n}");
-            printout(res)
+            let splits = res.split("\n");
+            for line in splits {
+                printout(line);
+            }
         },
         Err(_) => printout("Failed to load db"),
     }
