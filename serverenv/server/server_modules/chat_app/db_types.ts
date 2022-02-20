@@ -2,6 +2,7 @@ type Message = {
     text: string;
     id: number;
     user_id: number;
+    timestamp: number;
 }
 
 type User = {

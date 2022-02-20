@@ -25,11 +25,12 @@ function create_message(text: string, user_id: number, chat_id: number): number 
     let message: db_types.Message = {
         text: text,
         id: data.next_message_id,
-        user_id: user_id
+        user_id: user_id,
+        timestamp: new Date().getTime()
     }
     data.next_message_id = data.next_message_id + 1;
     data.messages.push(message);
-    data.chats[chat_id].member_ids.push(message.id);
+    data.chats[chat_id].message_ids.push(message.id);
 
     save_db();
     return message.id;
@@ -84,7 +85,10 @@ function new_database() {
     }
     data = db;
     create_chat("Global chat", 0);
-    create_user("Admin","123");
+    create_user("Admin", "123");
+    
+    //remove duplicate 0 from globalchat.member_ids
+    data.chats[0].member_ids = [0];
 }
 
 function hash(password: string, salt: string) {
