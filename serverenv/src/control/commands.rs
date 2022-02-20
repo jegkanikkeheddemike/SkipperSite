@@ -25,7 +25,11 @@ pub async fn handle_command(
 
 fn get_db(_args: Vec<String>, _enviroment_state: EnviromentState) {
     match fs::read_to_string("./serverenv/chatdb.json") {
-        Ok(res) => printout(res),
+        Ok(res) => {
+            let res = res.replace("{", "{\n");
+            let res = res.replace("}", "\n}");
+            printout(res)
+        },
         Err(_) => printout("Failed to load db"),
     }
 }
