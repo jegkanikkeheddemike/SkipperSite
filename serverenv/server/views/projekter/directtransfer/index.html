@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="/global_styles.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+    <title>Directrransfer</title>
+</head>
+
+<body>
+    <div style="text-align: center;">
+        <h1>
+            Directtransfer
+        </h1>
+        <h4>
+            Directransfer er både en CLI og en desktop app som kan bruges til at overføre filer over LAN forbindelser.
+            <br>Kildekoden kan findes på <a href="https://github.com/jegkanikkeheddemike/ThorProjekter"> https://github.com/jegkanikkeheddemike/ThorProjekter</a>
+        </h4>
+        <h3 class="downloadlink">
+            <a href="/directtransfer.zip">Download</a>
+        </h3>
+        <p>
+            Directransfer kan sættes til to "modes": HOST og LEECH. Host bruges hvis man har en fil
+            man vil dele. og Leech bruges til at downloade en fil som en anden hoster.
+            <br>
+            I CLI'en skriver man derfor:<br>
+            directtransfer.exe host "C:/min_fil_eller_mappe"
+            <br>eller<br>
+            directtransfer.exe leech "hosterns ip:port"
+
+            <br>
+            Bemærk at det er lavet til at overføre med LAN forbindelser. Men hvis man åbner en port i sit internet kan
+            man også overføre gennem den
+
+            <br><br>
+            Normalt bliver filerne overført til C:/ProgramData/directtransfer/output men man
+            kan enten skrive directtransfer.exe settings set output_folder "C:/min_nye_output_mappe"
+            <br>eller<br>
+            directtransfer.exe leech "ip:port" "C:/min_midlertidige_output_mappe"
+            <br>
+            Man kan tjekke sine settings ved at skrive <br>
+            directtransfer.exe settings get
+        </p>
+    </div>
+
+</body>
+
+</html>
